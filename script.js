@@ -36,12 +36,43 @@ $(document).ready(function () {
             }
         }
 
-        $('#loader').addClass('hide');
+        var imagesToLoad = [];
+        for (var j = 0; j < questions.length; j++) {
+            var q = questions[j];
+            var mediaUrl = q.media || q.image;
+            var mediaType = q.mediaType || 'image';
+            if (mediaUrl && mediaType !== 'video') {
+                imagesToLoad.push(mediaUrl);
+            }
+        }
 
-        if (index == 0) {
-            showStartScreen();
+        var loadedImagesCount = 0;
+
+        function finishLoading() {
+            $('#loader').addClass('hide');
+
+            if (index == 0) {
+                showStartScreen();
+            } else {
+                showQuizStep();
+            }
+        }
+
+        if (imagesToLoad.length === 0) {
+            finishLoading();
         } else {
-            showQuizStep();
+            for (var k = 0; k < imagesToLoad.length; k++) {
+                var img = new Image();
+                img.onload = function() {
+                    loadedImagesCount++;
+                    if (loadedImagesCount === imagesToLoad.length) finishLoading();
+                };
+                img.onerror = function() {
+                    loadedImagesCount++;
+                    if (loadedImagesCount === imagesToLoad.length) finishLoading();
+                };
+                img.src = imagesToLoad[k];
+            }
         }
 
         var currentZoom = 1;

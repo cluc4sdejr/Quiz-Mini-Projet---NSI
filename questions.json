@@ -2,54 +2,98 @@
     "questions": {
         "001": {
             "question": "Quel est l'élement pour créer un bouton natif en HTML?",
-            "image": "https://media.discordapp.net/attachments/1324760543504105472/1328074562252050572/player_floss-1.gif?ex=69b45d52&is=69b30bd2&hm=a74031208eb1014d7f2cf6108ccea77935b4bf981aa8cfb82a1594aa88a91ecb&=",
-            "answers": ["&lt;div&gt;", "&lt;select&gt;", "&lt;button&gt;"],
+            "media": "https://media.discordapp.net/attachments/1324760543504105472/1328074562252050572/player_floss-1.gif?ex=69b45d52&is=69b30bd2&hm=a74031208eb1014d7f2cf6108ccea77935b4bf981aa8cfb82a1594aa88a91ecb&=",
+            "mediaType": "image",
+            "answers": [
+                "&lt;div&gt;",
+                "&lt;select&gt;",
+                "&lt;button&gt;"
+            ],
             "answerArray": "3"
         },
         "002": {
             "question": "Quelle balise HTML utilise-t-on pour faire un titre ?",
-            "image": "https://images-ext-1.discordapp.net/external/2EfcO2VgfRid5UTwSJA1UJhmRUeMeizh6rCGdF_3spY/https/media.tenor.com/rLWDhoNbKxQAAAPo/steve-minecraft.mp4",
-            "answers": ["&lt;h1&gt;", "&lt;p&gt;", "&lt;title&gt;"],
+            "media": "https://images-ext-1.discordapp.net/external/2EfcO2VgfRid5UTwSJA1UJhmRUeMeizh6rCGdF_3spY/https/media.tenor.com/rLWDhoNbKxQAAAPo/steve-minecraft.mp4",
+            "mediaType": "video",
+            "answers": [
+                "&lt;h1&gt;",
+                "&lt;p&gt;",
+                "&lt;title&gt;"
+            ],
             "answerArray": "1"
         },
         "003": {
             "question": "Quelle est la couleur du texte avec 'color: red;' en CSS ?",
-            "answers": ["Bleu", "Vert", "Rouge"],
+            "answers": [
+                "Bleu",
+                "Vert",
+                "Rouge"
+            ],
             "answerArray": "3"
         },
         "004": {
             "question": "En JavaScript, comment écrit-on 'Bonjour' dans une alerte ?",
-            "answers": ["alert('Bonjour');", "message('Bonjour');", "say('Bonjour');"],
+            "media": "https://media.discordapp.net/attachments/1324760543504105472/1328074562252050572/player_floss-1.gif?ex=69b45d52&is=69b30bd2&hm=a74031208eb1014d7f2cf6108ccea77935b4bf981aa8cfb82a1594aa88a91ecb&=",
+            "mediaType": "image",
+            "answers": [
+                "alert('Bonjour');",
+                "message('Bonjour');",
+                "say('Bonjour');"
+            ],
             "answerArray": "1"
         },
         "005": {
             "question": "Quelle balise permet d'insérer une image ?",
-            "answers": ["&lt;img&gt;", "&lt;pic&gt;", "&lt;image&gt;"],
+            "answers": [
+                "&lt;img&gt;",
+                "&lt;pic&gt;",
+                "&lt;image&gt;"
+            ],
             "answerArray": "1"
         },
         "006": {
             "question": "Quel symbole utilise-t-on pour un ID en CSS ?",
-            "answers": [".", "#", "@"],
+            "answers": [
+                ".",
+                "#",
+                "@"
+            ],
             "answerArray": "2"
         },
         "007": {
             "question": "Quelle balise crée un lien vers une autre page ?",
-            "answers": ["&lt;link&gt;", "&lt;href&gt;", "&lt;a&gt;"],
+            "answers": [
+                "&lt;link&gt;",
+                "&lt;href&gt;",
+                "&lt;a&gt;"
+            ],
             "answerArray": "3"
         },
         "008": {
             "question": "Quel est le signe pour multiplier en JavaScript ?",
-            "answers": ["x", "*", "+"],
+            "answers": [
+                "x",
+                "*",
+                "+"
+            ],
             "answerArray": "2"
         },
         "009": {
             "question": "Où met-on le code CSS d'habitude ?",
-            "answers": ["Dans un fichier .css", "Dans un fichier .jpg", "Dans un fichier .txt"],
+            "answers": [
+                "Dans un fichier .css",
+                "Dans un fichier .jpg",
+                "Dans un fichier .txt"
+            ],
             "answerArray": "1"
         },
         "010": {
             "question": "Quelle balise entoure tout le contenu visible d'une page ?",
-            "answers": ["&lt;head&gt;", "&lt;body&gt;", "&lt;footer&gt;"],
+            "answers": [
+                "&lt;head&gt;",
+                "&lt;body&gt;",
+                "&lt;footer&gt;"
+            ],
             "answerArray": "2"
         }
     }

@@ -9,7 +9,7 @@ $(document).ready(function () {
     $.getJSON(jsonUrl, function (data) {
         var allQuestions = data.questions;
         var keys = Object.keys(allQuestions);
-        
+
         for (var i = 0; i < keys.length; i++) {
             var key = keys[i];
             var item = allQuestions[key];
@@ -17,21 +17,21 @@ $(document).ready(function () {
         }
 
         var savedData = localStorage.getItem('quiz');
-        
+
         if (savedData != null) {
             var parsedData = JSON.parse(savedData);
-            
-            if (parsedData.index > 0 && parsedData.index < questions.length) {
-            $('.recovery-alert').removeClass('hidden');
 
-            $('#btn-recovery').off('click').click(function() {
-                index = parsedData.index;
-                answers = parsedData.answers;
-                score = parsedData.score;
-                $('.recovery-alert').addClass('hidden');
-                showQuizStep();
-            });
-        } else if (parsedData.index >= questions.length) {
+            if (parsedData.index > 0 && parsedData.index < questions.length) {
+                $('.recovery-alert').removeClass('hidden');
+
+                $('#btn-recovery').off('click').click(function () {
+                    index = parsedData.index;
+                    answers = parsedData.answers;
+                    score = parsedData.score;
+                    $('.recovery-alert').addClass('hidden');
+                    showQuizStep();
+                });
+            } else if (parsedData.index >= questions.length) {
                 localStorage.removeItem('quiz');
             }
         }
@@ -60,43 +60,43 @@ $(document).ready(function () {
             updateZoomTransform();
         }
 
-        $('#closeZoom').off('click').click(function() {
+        $('#closeZoom').off('click').click(function () {
             $('#zoomModal').addClass('hidden');
             setTimeout(resetZoom, 400);
         });
 
-        $('#zoomModal').off('click').click(function(e) {
+        $('#zoomModal').off('click').click(function (e) {
             if (e.target === this || $(e.target).hasClass('zoom-wrapper') || $(e.target).closest('.zoom-modal-content').length === 0 && e.target.id !== 'zoomImage' && !$(e.target).closest('.zoom-controls').length && e.target.id !== 'closeZoom') {
                 $('#zoomModal').addClass('hidden');
                 setTimeout(resetZoom, 400);
             }
         });
 
-        $(document).off('keydown.zoommodal').on('keydown.zoommodal', function(e) {
+        $(document).off('keydown.zoommodal').on('keydown.zoommodal', function (e) {
             if (e.key === 'Escape') {
                 $('#zoomModal').addClass('hidden');
                 setTimeout(resetZoom, 400);
             }
         });
 
-        $('#zoomInBtn').off('click').click(function(e) {
+        $('#zoomInBtn').off('click').click(function (e) {
             e.stopPropagation();
             currentZoom = Math.min(currentZoom + 0.5, 5);
             updateZoomTransform();
         });
 
-        $('#zoomOutBtn').off('click').click(function(e) {
+        $('#zoomOutBtn').off('click').click(function (e) {
             e.stopPropagation();
             currentZoom = Math.max(currentZoom - 0.5, 0.5);
             updateZoomTransform();
         });
 
-        $('#zoomResetBtn').off('click').click(function(e) {
+        $('#zoomResetBtn').off('click').click(function (e) {
             e.stopPropagation();
             resetZoom();
         });
 
-        $('#zoomImage').off('wheel').on('wheel', function(e) {
+        $('#zoomImage').off('wheel').on('wheel', function (e) {
             e.preventDefault();
             if (e.originalEvent.deltaY < 0) {
                 currentZoom = Math.min(currentZoom + 0.2, 5);
@@ -106,27 +106,27 @@ $(document).ready(function () {
             updateZoomTransform();
         });
 
-        $('#zoomImage').off('mousedown touchstart').on('mousedown touchstart', function(e) {
+        $('#zoomImage').off('mousedown touchstart').on('mousedown touchstart', function (e) {
             e.preventDefault();
             isDragging = true;
             var clientX = e.type === 'touchstart' ? e.originalEvent.touches[0].clientX : e.clientX;
             var clientY = e.type === 'touchstart' ? e.originalEvent.touches[0].clientY : e.clientY;
-            
+
             startX = clientX - translateX;
             startY = clientY - translateY;
         });
 
-        $(window).off('mousemove touchmove').on('mousemove touchmove', function(e) {
+        $(window).off('mousemove touchmove').on('mousemove touchmove', function (e) {
             if (!isDragging) return;
             var clientX = e.type === 'touchmove' ? e.originalEvent.touches[0].clientX : e.clientX;
             var clientY = e.type === 'touchmove' ? e.originalEvent.touches[0].clientY : e.clientY;
-            
+
             translateX = clientX - startX;
             translateY = clientY - startY;
             updateZoomTransform();
         });
 
-        $(window).off('mouseup touchend').on('mouseup touchend', function() {
+        $(window).off('mouseup touchend').on('mouseup touchend', function () {
             isDragging = false;
         });
     });
@@ -180,9 +180,10 @@ function showQuizStep() {
     $('.q-container').removeClass('start-screen');
     $('.q-c-progress').removeClass('hidden');
     var currentQuestion = questions[index];
-    
+
+    var hadMedia = $('.q-media').length > 0 && $('.q-media').css('opacity') !== '0';
     $('.q-media').remove();
-    
+
     var progressRatio = (index + 1) / totalQuestions;
     var progressPercent = Math.round(progressRatio * 100);
     var percentText = progressPercent + '%';
@@ -190,30 +191,64 @@ function showQuizStep() {
     $('.p-thing').css('width', percentText).text(percentText);
     $('.q-question').text(currentQuestion.question);
 
-    if (currentQuestion.image || (currentQuestion.media && currentQuestion.media.url)) {
-        var imageUrl = currentQuestion.image || currentQuestion.media.url;
+    if (currentQuestion.media || currentQuestion.image) {
+        var mediaUrl = currentQuestion.media || currentQuestion.image;
+        var mediaType = currentQuestion.mediaType || 'image';
         var zoomSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>';
-        var mediaHtml = '<div class="q-media"><img src="' + imageUrl + '" alt="Question media"><button class="zoom-btn">' + zoomSvg + ' Agrandir</button></div>';
-        $('.q-question').after(mediaHtml);
+
+        var mediaHtml = '';
+        if (mediaType === 'video') {
+            mediaHtml = '<div class="q-media"><video src="' + mediaUrl + '" playsinline controls style="max-width: 100%; max-height: 280px; border-radius: 6px; outline: none; display: block; margin: 0 auto;"></video></div>';
+        } else {
+            mediaHtml = '<div class="q-media"><img src="' + mediaUrl + '" alt="Question media"><button class="zoom-btn">' + zoomSvg + ' Agrandir</button></div>';
+        }
+
+        var $newMedia = $(mediaHtml);
         
-        $('.q-media img, .zoom-btn').off('click').click(function(e) {
-            e.stopPropagation();
-            $('#zoomImage').attr('src', imageUrl);
-            $('#zoomModal').removeClass('hidden');
-        });
+        if (!hadMedia) {
+            $newMedia.css({
+                'max-height': '0px',
+                'opacity': '0',
+                'margin': '0',
+                'padding': '0',
+                'border-width': '0px'
+            });
+        }
+        
+        $('.q-question').after($newMedia);
+        
+        if (!hadMedia) {
+            setTimeout(function() {
+                $newMedia.css({
+                    'max-height': '300px',
+                    'opacity': '1',
+                    'margin': '',
+                    'padding': '',
+                    'border-width': ''
+                });
+            }, 10);
+        }
+
+        if (mediaType !== 'video') {
+            $('.q-media img, .zoom-btn').off('click').click(function (e) {
+                e.stopPropagation();
+                $('#zoomImage').attr('src', mediaUrl);
+                $('#zoomModal').removeClass('hidden');
+            });
+        }
     }
 
     $('.q-options').html('');
     for (var j = 0; j < currentQuestion.answers.length; j++) {
         var answerId = j + 1;
         var answerLabel = currentQuestion.answers[j];
-        
+
         var buttonHtml = '<button class="q-option" data-ans="' + answerId + '">';
         buttonHtml = buttonHtml + '<span class="code">' + answerLabel + '</span>';
         buttonHtml = buttonHtml + '</button>';
-        
+
         var $button = $(buttonHtml);
-        
+
         if (answers[index] == answerId) {
             $button.addClass('selected');
         }
@@ -250,7 +285,26 @@ function showQuizStep() {
         if (!$(this).prop('disabled')) {
             index = index + 1;
             saveProgress();
-            showQuizStep();
+
+            var $media = $('.q-media');
+            var nextQuestion = questions[index];
+            var nextHasMedia = nextQuestion && (nextQuestion.media || nextQuestion.image);
+
+            if ($media.length > 0 && !nextHasMedia) {
+                $media.css({
+                    'max-height': '0px',
+                    'opacity': '0',
+                    'margin': '0',
+                    'padding': '0',
+                    'border-width': '0px'
+                });
+
+                setTimeout(function () {
+                    showQuizStep();
+                }, 300);
+            } else {
+                showQuizStep();
+            }
         }
     });
 }
@@ -259,9 +313,9 @@ function showFinalResults() {
     var total = questions.length;
     var finalRatio = score / total;
     var finalPercent = Math.round(finalRatio * 100);
-    
+
     var message = '';
-    
+
     if (finalPercent === 100) {
         message = 'MAIS QUEL GOAT LUI';
     } else if (finalPercent >= 80) {
@@ -273,20 +327,20 @@ function showFinalResults() {
     } else {
         message = 'Fréro.. t\'abuses franchement.';
     }
-    
+
     var resultsHtml = '<div class="results-container">' +
         '<h2 class="results-title">Quiz terminé!</h2>' +
         '<div class="results-card">' +
-            '<div class="score-display">' +
-                '<div class="score-big">' +
-                    '<div class="score-item-value">' + score + '/' + total + '</div>' +
-                    '<div class="score-label">Bonnes réponses</div>' +
-                '</div>' +
-            '</div>' +
-            '<p class="results-message">' + message + '</p>' +
+        '<div class="score-display">' +
+        '<div class="score-big">' +
+        '<div class="score-item-value">' + score + '/' + total + '</div>' +
+        '<div class="score-label">Bonnes réponses</div>' +
         '</div>' +
-    '</div>';
-    
+        '</div>' +
+        '<p class="results-message">' + message + '</p>' +
+        '</div>' +
+        '</div>';
+
     $('.q-question').html(resultsHtml);
     $('.q-options').html('');
     $('.p-thing').css('width', '100%').text('100%');

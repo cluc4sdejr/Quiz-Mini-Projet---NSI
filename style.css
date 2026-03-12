@@ -271,13 +271,17 @@ p {
     border-color: #888;
 }
 
-.q-media img {
+.q-media img,
+.q-media video {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
     border-radius: 6px;
-    cursor: pointer;
     transition: all ease-in-out 200ms;
+}
+
+.q-media img {
+    cursor: pointer;
 }
 
 .q-media img:hover {
@@ -528,7 +532,6 @@ p {
     transition: all ease-in-out 300ms;
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
     .whole {
         width: 95%;

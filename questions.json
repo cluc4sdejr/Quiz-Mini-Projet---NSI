@@ -12,7 +12,7 @@
             "answerArray": "3"
         },
         "002": {
-            "question": "Quelle balise HTML utilise-t-on pour faire un titre ?",
+            "question": "Quelle balise HTML utilise-t-on pour faire un grand titre sur la page ?",
             "media": "assets/html_title.png",
             "mediaType": "image",
             "answers": [

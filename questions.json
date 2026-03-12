@@ -2,7 +2,7 @@
     "questions": {
         "001": {
             "question": "Quel est l'élement pour créer un bouton natif en HTML?",
-            "media": "/assets/html_button.png",
+            "media": "assets/html_button.png",
             "mediaType": "image",
             "answers": [
                 "&lt;div&gt;",
@@ -13,7 +13,7 @@
         },
         "002": {
             "question": "Quelle balise HTML utilise-t-on pour faire un titre ?",
-            "media": "/assets/html_title.png",
+            "media": "assets/html_title.png",
             "mediaType": "image",
             "answers": [
                 "&lt;h1&gt;",
@@ -24,7 +24,7 @@
         },
         "003": {
             "question": "Quelle est la couleur du texte avec 'color: red;' en CSS ?",
-            "media": "/assets/css_color.png",
+            "media": "assets/css_color.png",
             "mediaType": "image",
             "answers": [
                 "Bleu",
@@ -35,7 +35,7 @@
         },
         "004": {
             "question": "En JavaScript, comment écrit-on 'Bonjour' dans une alerte ?",
-            "media": "/assets/js_alert.png",
+            "media": "assets/js_alert.png",
             "mediaType": "image",
             "answers": [
                 "alert('Bonjour');",
@@ -46,7 +46,7 @@
         },
         "005": {
             "question": "Quelle balise permet d'insérer une image ?",
-            "media": "/assets/html_image.png",
+            "media": "assets/html_image.png",
             "mediaType": "image",
             "answers": [
                 "&lt;img&gt;",
@@ -57,7 +57,7 @@
         },
         "006": {
             "question": "Quel symbole utilise-t-on pour un ID en CSS ?",
-            "media": "/assets/css_id.png",
+            "media": "assets/css_id.png",
             "mediaType": "image",
             "answers": [
                 ".",
@@ -68,7 +68,7 @@
         },
         "007": {
             "question": "Quelle balise crée un lien vers une autre page ?",
-            "media": "/assets/html_link.png",
+            "media": "assets/html_link.png",
             "mediaType": "image",
             "answers": [
                 "&lt;link&gt;",
@@ -79,7 +79,7 @@
         },
         "008": {
             "question": "Quel est le signe pour multiplier en JavaScript ?",
-            "media": "/assets/js_times.png",
+            "media": "assets/js_times.png",
             "mediaType": "image",
             "answers": [
                 "x",
@@ -90,7 +90,7 @@
         },
         "009": {
             "question": "Où met-on le code CSS d'habitude ?",
-            "media": "/assets/css_filename.png",
+            "media": "assets/css_filename.png",
             "mediaType": "image",
             "answers": [
                 "Dans un fichier .css",
@@ -101,7 +101,7 @@
         },
         "010": {
             "question": "Quelle balise entoure tout le contenu visible d'une page ?",
-            "media": "/assets/html_body.png",
+            "media": "assets/html_body.png",
             "mediaType": "image",
             "answers": [
                 "&lt;head&gt;",

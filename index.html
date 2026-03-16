@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz NSI</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://use.hugeicons.com/font/icons.css" crossorigin="anonymous">
 </head>
 
 <body>
@@ -50,15 +51,21 @@
             <button class="primary" id="btn-recovery">Récup-moi ça !</button>
         </div>
         <div class="q-c-progress hidden">
+            <div class="p-info">
+                <span id="p-count">0/0</span>
+                <span id="p-percent">0%</span>
+            </div>
             <div class="q-progress">
-                <div class="p-thing"></div>
             </div>
         </div>
         <div class="q-container">
             <div class="q-question">Chargement...</div>
             <div class="q-options">
             </div>
-            <button class="primary" id="btn-validate">Suivant</button>
+            <div class="q-actions">
+                <button class="primary" id="btn-validate">Suivant</button>
+                <button class="secondary" id="btn-skip">Passer</button>
+            </div>
         </div>
     </div>
     <div class="zoom-modal hidden" id="zoomModal">
@@ -99,6 +106,7 @@
             <img id="zoomImage" src="" alt="Image agrandie">
         </div>
     </div>
+    <div id="toast-container"></div>
 </body>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="script.js"></script>

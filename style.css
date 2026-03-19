@@ -165,6 +165,9 @@ body {
     border: none;
     font-family: "Poppins", sans-serif;
     transition: all ease-in-out 50ms;
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
 }
 
 .primary:hover {

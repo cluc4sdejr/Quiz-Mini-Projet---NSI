@@ -478,9 +478,29 @@ function goToNextStep() {
 
         setTimeout(transitionAndShow, 300);
         $(".score").innerText = score;
+        var total = questions.length;
+
+        score = 0;
+        for (var i = 0; i < total; i++) {
+            if (answers[i] == questions[i].answerArray) {
+                score++;
+            }
+        }
+
+        var finalRatio = score / total;
     } else {
         transitionAndShow();
         $(".score").innerText = score;
+        var total = questions.length;
+
+        score = 0;
+        for (var i = 0; i < total; i++) {
+            if (answers[i] == questions[i].answerArray) {
+                score++;
+            }
+        }
+
+        var finalRatio = score / total;
     }
 }
 

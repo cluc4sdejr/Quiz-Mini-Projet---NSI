@@ -477,8 +477,10 @@ function goToNextStep() {
         });
 
         setTimeout(transitionAndShow, 300);
+        $(".score").innerText = score;
     } else {
         transitionAndShow();
+        $(".score").innerText = score;
     }
 }
 

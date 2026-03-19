@@ -477,7 +477,7 @@ function goToNextStep() {
         });
 
         setTimeout(transitionAndShow, 300);
-        $(".score").innerText = score;
+        $("#score").innerText = score;
         var total = questions.length;
 
         score = 0;
@@ -490,7 +490,7 @@ function goToNextStep() {
         var finalRatio = score / total;
     } else {
         transitionAndShow();
-        $(".score").innerText = score;
+        $("#score").innerText = score;
         var total = questions.length;
 
         score = 0;

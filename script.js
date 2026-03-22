@@ -234,13 +234,27 @@ function showToast(message, iconClass = 'hgi hgi-stroke hgi-next') {
     }, 3000);
 }
 
+function updateScoreDisplay() {
+    var total = questions.length;
+    var currentScore = 0;
+    
+    for (var i = 0; i < total; i++) {
+        if (answers[i] && answers[i] == questions[i].answerArray) {
+            currentScore++;
+        }
+    }
+    
+    $('#score').text(currentScore);
+}
+
 function showStartScreen() {
     $('.q-c-progress').addClass('hidden');
     $('.p-thing').css('width', '0%').text('0%');
     $('.q-question').text('Bienvenue!');
     $('.q-options').text('Bienvenue dans ce Quiz de fou sur la NSI (t\'as vu le brother il fait une pub mdrr)');
-    $('#p-count').text('0/' + questions.length);
+    $('#p-count').text('Question 0/' + questions.length);
     $('#p-percent').text('0%');
+    $('#score').text('0');
     $('.q-progress').empty();
     $('#btn-validate').text('Commencer le quizz').removeClass('hidden');
     $('#btn-skip').addClass('hidden');
@@ -296,8 +310,9 @@ function showQuizStep() {
     var answeredCount = Object.keys(answers).length;
     var progressPercent = Math.round((answeredCount / totalQuestions) * 100);
 
-    $('#p-count').text(answeredCount + '/' + totalQuestions);
+    $('#p-count').text('Question ' + answeredCount + '/' + totalQuestions);
     $('#p-percent').text(progressPercent + '%');
+    updateScoreDisplay();
 
     var questionText = currentQuestion.question;
     $('.q-question').html(questionText);
@@ -416,8 +431,9 @@ function showQuizStep() {
         var total = questions.length;
         var answeredCount = Object.keys(answers).length;
         var percent = Math.round((answeredCount / total) * 100);
-        $('#p-count').text(answeredCount + '/' + total);
+        $('#p-count').text('Question ' + answeredCount + '/' + total);
         $('#p-percent').text(percent + '%');
+        updateScoreDisplay();
         $('.q-progress .p-step').eq(index).addClass('filled').removeClass('current pulse-step skipped');
 
         saveProgress();
@@ -477,7 +493,7 @@ function goToNextStep() {
         });
 
         setTimeout(transitionAndShow, 300);
-        $("#score").innerText = score;
+        updateScoreDisplay();
         var total = questions.length;
 
         score = 0;
@@ -490,7 +506,7 @@ function goToNextStep() {
         var finalRatio = score / total;
     } else {
         transitionAndShow();
-        $("#score").innerText = score;
+        updateScoreDisplay();
         var total = questions.length;
 
         score = 0;
@@ -549,7 +565,7 @@ function showFinalResults() {
     $('.q-options').empty();
     $('.q-media').remove();
 
-    $('#p-count').text(total + '/' + total);
+    $('#p-count').text('Question ' + total + '/' + total);
     $('#p-percent').text('100%');
     $('.q-progress .p-step').removeClass('current pulse-step').addClass('filled');
 

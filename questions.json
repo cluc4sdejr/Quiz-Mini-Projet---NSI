@@ -1,4 +1,10 @@
 {
+    "meta": {
+        "title": "Questions basées sur le Langage Web",
+        "description": "Questionnaire débutant",
+        "authorId": 1,
+        "difficulty": 1
+    },
     "questions": {
         "001": {
             "question": "Quel est l'élement pour créer un bouton natif en HTML?",

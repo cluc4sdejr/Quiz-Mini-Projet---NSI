@@ -111,6 +111,13 @@ body {
     font-size: 12px;
     font-family: monospace;
     color: #666;
+    position: relative;
+}
+
+#score {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .p-thing {
@@ -228,6 +235,7 @@ body {
     font-size: 18px;
     color: #333;
     line-height: 1.6;
+    text-align: center;
 }
 
 .q-container.start-screen .q-question {

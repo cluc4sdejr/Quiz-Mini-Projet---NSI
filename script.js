@@ -44,7 +44,7 @@ $(document).ready(function () {
         $('#metaDescription').text('Description: ' + metaDescription);
         $('#metaAuthor').text('Author: ' + metaAuthor);
         $('#metaDifficulty').text('Difficulty (id): ' + metaDifficulty);
-        $('#userVersion').text('Version: ' + metaVersion)
+        $('#metaVersion').text('Version: ' + metaVersion)
         $('#metaCreationDate').text('[UNIX] Created on: ' + formattedDate)
         $('#userAgent').text('UserAgent detected: ' + userAgent)
 

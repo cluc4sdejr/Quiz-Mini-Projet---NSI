@@ -18,9 +18,10 @@ $(document).ready(function () {
         var metaDifficulty = data.meta.difficulty;
         var keys = Object.keys(allQuestions);
 
+        $('#debugTitle').text('Fetched from:' + jsonUrl);
         $('#metaTitle').text(metaTitle);
         $('#metaDescription').text(metaDescription);
-        $('#metaAuthorId').text(metaAuthor);
+        $('#metaAuthor').text(metaAuthor);
         $('#metaDifficulty').text(metaDifficulty);
 
         for (var i = 0; i < keys.length; i++) {

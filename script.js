@@ -7,10 +7,90 @@ var isFinishing = false;
 var toastTimer = null;
 var toastCount = 1;
 
+function getSystemInfo() {
+    var userAgent = navigator.userAgent;
+    
+    var osName = 'Unknown OS';
+    if (userAgent.indexOf('Win') > -1) osName = 'Windows';
+    else if (userAgent.indexOf('Mac') > -1) osName = 'macOS';
+    else if (userAgent.indexOf('X11') > -1) osName = 'Unix';
+    else if (userAgent.indexOf('Linux') > -1) osName = 'Linux';
+    else if (userAgent.indexOf('Android') > -1) osName = 'Android';
+    else if (userAgent.indexOf('iPhone') > -1 || userAgent.indexOf('iPad') > -1) osName = 'iOS';
+    
+    var browserName = 'Unknown Browser';
+    var browserVersion = 'Unknown';
+    if (userAgent.indexOf('Chrome') > -1 && userAgent.indexOf('Edge') === -1) {
+        browserName = 'Chrome';
+        var chromeMatch = userAgent.match(/Chrome\/(\d+)/);
+        browserVersion = chromeMatch ? chromeMatch[1] : 'Unknown';
+    } else if (userAgent.indexOf('Safari') > -1 && userAgent.indexOf('Chrome') === -1) {
+        browserName = 'Safari';
+        var safariMatch = userAgent.match(/Version\/(\d+)/);
+        browserVersion = safariMatch ? safariMatch[1] : 'Unknown';
+    } else if (userAgent.indexOf('Firefox') > -1) {
+        browserName = 'Firefox';
+        var firefoxMatch = userAgent.match(/Firefox\/(\d+)/);
+        browserVersion = firefoxMatch ? firefoxMatch[1] : 'Unknown';
+    } else if (userAgent.indexOf('Edge') > -1) {
+        browserName = 'Edge';
+        var edgeMatch = userAgent.match(/Edg\/(\d+)/);
+        browserVersion = edgeMatch ? edgeMatch[1] : 'Unknown';
+    } else if (userAgent.indexOf('Trident') > -1) {
+        browserName = 'IE';
+        var ieMatch = userAgent.match(/Trident.*rv:(\d+)/);
+        browserVersion = ieMatch ? ieMatch[1] : 'Unknown';
+    }
+    
+    var screenWidth = window.screen.width;
+    var screenHeight = window.screen.height;
+    var screenDPI = window.devicePixelRatio ? window.devicePixelRatio : 1;
+    var screenInfo = screenWidth + 'x' + screenHeight + ' @ ' + Math.round(screenDPI * 100) + '%';
+    
+    var language = navigator.language || navigator.userLanguage || 'Unknown';
+    
+    var timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    
+    return {
+        osName: osName,
+        browserName: browserName,
+        browserVersion: browserVersion,
+        screenInfo: screenInfo,
+        language: language,
+        timezone: timezone,
+        userAgent: userAgent
+    };
+}
+
 $(document).ready(function () {
     var jsonUrl = 'questions.json';
 
-    $.getJSON(jsonUrl, function (data) {
+    // Check if there's imported data in localStorage
+    var importedData = localStorage.getItem('importedQuizData');
+    var dataSource = 'original';
+    var dataToLoad = null;
+    
+    if (importedData) {
+        try {
+            dataToLoad = JSON.parse(importedData);
+            dataSource = 'imported';
+        } catch(e) {
+            // If parsing fails, fall back to original
+            dataToLoad = null;
+        }
+    }
+    
+    // If we have imported data, use it directly; otherwise load from file
+    if (dataToLoad) {
+        processQuizData(dataToLoad, dataSource);
+    } else {
+        $.getJSON(jsonUrl, function (data) {
+            processQuizData(data, 'original');
+        });
+    }
+    
+    function processQuizData(data, source) {
+        dataSource = source;
         var allQuestions = data.questions;
         var metaTitle = data.meta.title;
         var metaDescription = data.meta.description;
@@ -39,14 +119,22 @@ $(document).ready(function () {
 
         var formattedDate = day + '-' + month + '-' + year + ' at ' + hours + ':' + minutes + ' ' + meridiem;
 
-        $('#debugTitle').html('Fetched from: ' + '<span class="debugFileName">' + jsonUrl + '</span>');
+        var sourceLabel = dataSource === 'imported' ? ' (IMPORTED)' : '';
+        $('#debugTitle').html('Fetched from: ' + '<span class="debugFileName">' + jsonUrl + '</span>' + sourceLabel);
         $('#metaTitle').text('Title: ' + metaTitle);
         $('#metaDescription').text('Description: ' + metaDescription);
         $('#metaAuthor').text('Author: ' + metaAuthor);
         $('#metaDifficulty').text('Difficulty (id): ' + metaDifficulty);
         $('#metaVersion').text('Version: ' + metaVersion)
         $('#metaCreationDate').text('[UNIX] Created on: ' + formattedDate)
-        $('#userAgent').text('UserAgent detected: ' + userAgent)
+        
+        var systemInfo = getSystemInfo();
+        $('#osInfo').text('OS: ' + systemInfo.osName);
+        $('#browserInfo').text('Browser: ' + systemInfo.browserName + ' v' + systemInfo.browserVersion);
+        $('#screenInfo').text('Screen: ' + systemInfo.screenInfo);
+        $('#languageInfo').text('Language: ' + systemInfo.language);
+        $('#timezoneInfo').text('Timezone: ' + systemInfo.timezone);
+        $('#userAgent').text('UserAgent: ' + systemInfo.userAgent)
 
         console.log(userAgent);
 
@@ -55,6 +143,14 @@ $(document).ready(function () {
             var item = allQuestions[key];
             questions.push(item);
         }
+
+        $('#totalQuestions').text('Questions: ' + questions.length);
+        $('#gameState').text('State: INITIALIZED');
+        $('#currentQuestion').text('Current: -');
+        $('#answered').text('Answered: 0');
+        $('#skipped').text('Skipped: 0');
+        $('#currentScore').text('Score: 0');
+        updateDebugInfo();
 
         var savedData = localStorage.getItem('quiz');
 
@@ -116,6 +212,7 @@ $(document).ready(function () {
                 img.src = imagesToLoad[k];
             }
         }
+    } // End of processQuizData function
 
         var currentZoom = 1;
         var isDragging = false;
@@ -202,8 +299,56 @@ $(document).ready(function () {
         $(window).off('mouseup touchend').on('mouseup touchend', function () {
             isDragging = false;
         });
+        
+        var quizDataForSave = null;
+        
+        $('#btn-save-quiz').off('click').click(function() {
+            $.getJSON('questions.json', function(data) {
+                var dataStr = JSON.stringify(data, null, 2);
+                var dataBlob = new Blob([dataStr], {type: 'application/json'});
+                var url = URL.createObjectURL(dataBlob);
+                var link = document.createElement('a');
+                link.href = url;
+                link.download = 'questions-backup-' + new Date().getTime() + '.json';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                showToast('Quiz téléchargé');
+            });
+        });
+        
+        $('#btn-import-quiz').off('click').click(function() {
+            $('#quiz-file-input').click();
+        });
+        
+        $('#quiz-file-input').off('change').on('change', function(e) {
+            var file = e.target.files[0];
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        var importedData = JSON.parse(event.target.result);
+                        if (importedData.questions && importedData.meta) {
+                            localStorage.setItem('importedQuizData', JSON.stringify(importedData));
+                            showToast('Quiz Importé ! Actualise pour appliquer.');
+                        } else {
+                            showToast('Format de quizz invalide.');
+                        }
+                    } catch(err) {
+                        showToast('Erreur lors de la lecture du fichier.');
+                    }
+                };
+                reader.readAsText(file);
+            }
+            this.value = '';
+        });
+        
+        $('#btn-reset-quiz').off('click').click(function() {
+            localStorage.removeItem('importedQuizData');
+            showToast('Les données ont étées supprimées avec succès !');
+        });
     });
-});
 
 
 
@@ -217,6 +362,29 @@ function saveProgress() {
     };
     var jsonString = JSON.stringify(status);
     localStorage.setItem('quiz', jsonString);
+}
+
+function updateDebugInfo() {
+    var answerCount = Object.keys(answers).length;
+    var gameState = 'IDLE';
+    var currentQIndex = '-';
+    
+    if (questions.length === 0) {
+        gameState = 'LOADING';
+    } else if (index === 0 && answerCount === 0 && skippedIndices.length === 0) {
+        gameState = 'WAITING TO START';
+    } else if (index < questions.length || (index >= questions.length && skippedIndices.length > 0)) {
+        gameState = 'PLAYING';
+        currentQIndex = (index + 1) + '/' + questions.length;
+    } else if (index >= questions.length && skippedIndices.length === 0) {
+        gameState = 'FINISHED';
+    }
+    
+    $('#gameState').text('State: ' + gameState);
+    $('#currentQuestion').text('Current: ' + currentQIndex);
+    $('#answered').text('Answered: ' + answerCount);
+    $('#skipped').text('Skipped: ' + skippedIndices.length);
+    $('#currentScore').text('Score: ' + score);
 }
 
 function showToast(message, iconClass = "hgi hgi-stroke hgi-next") {
@@ -280,6 +448,7 @@ function updateScoreDisplay() {
         }
     }
     
+    score = currentScore;
     $('#score').text(currentScore);
 }
 
@@ -303,8 +472,11 @@ function showStartScreen() {
         skippedIndices = [];
         $('.recovery-alert').addClass('hidden');
         saveProgress();
+        updateDebugInfo();
         showQuizStep();
     });
+    
+    updateDebugInfo();
 }
 
 function showQuizStep() {
@@ -470,6 +642,7 @@ function showQuizStep() {
         $('#p-count').text('Question ' + answeredCount + '/' + total);
         $('#p-percent').text(percent + '%');
         updateScoreDisplay();
+        updateDebugInfo();
         $('.q-progress .p-step').eq(index).addClass('filled').removeClass('current pulse-step skipped');
 
         saveProgress();
@@ -483,8 +656,11 @@ function showQuizStep() {
         skippedIndices.push(index);
         saveProgress();
         showToast('Question mise de côté');
+        updateDebugInfo();
         goToNextStep();
     });
+    
+    updateDebugInfo();
 }
 
 function goToNextStep() {
@@ -614,6 +790,8 @@ function showFinalResults() {
         localStorage.removeItem('quiz');
         location.reload();
     });
+    
+    updateDebugInfo();
 }
 
 var easter_egg = new Konami(function() { 

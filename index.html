@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz NSI</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="icons.css">
 </head>
 
 <body>
@@ -107,14 +108,43 @@
     </div>
     <div id="toast-container"></div>
     <div class="debug-container">
-        <p id="debugTitle">Fetched from: [...]</p>
-        <p id="metaTitle">Title: [...]</p>
-        <p id="metaDescription">Description: [...]</p>
-        <p id="metaAuthor">Author: [...]</p>
-        <p id="metaDifficulty">Difficulty: [...]</p>
-        <p id="metaVersion">Version: [...]</p>
-        <p id="metaCreationDate">Created on: [...]</p>
-        <p id="userAgent">UserAgent : [...]</p>
+        <div class="debug-section">
+            <div class="debug-section-title">File Info</div>
+            <p id="debugTitle">Fetched from: [...]</p>
+            <div class="debug-file-actions">
+                <button id="btn-save-quiz" class="debug-btn">Save</button>
+                <button id="btn-import-quiz" class="debug-btn">Import</button>
+                <button id="btn-reset-quiz" class="debug-btn">Reset</button>
+                <input type="file" id="quiz-file-input" accept=".json" style="display: none;">
+            </div>
+        </div>
+        <div class="debug-section">
+            <div class="debug-section-title">Loaded Quiz Data</div>
+            <p id="metaTitle">Title: [...]</p>
+            <p id="metaDescription">Description: [...]</p>
+            <p id="metaAuthor">Author: [...]</p>
+            <p id="metaDifficulty">Difficulty: [...]</p>
+            <p id="metaVersion">Version: [...]</p>
+            <p id="metaCreationDate">Created on: [...]</p>
+            <p id="totalQuestions">Questions: [...]</p>
+        </div>
+        <div class="debug-section">
+            <div class="debug-section-title">Active State</div>
+            <p id="gameState">State: [...]</p>
+            <p id="currentQuestion">Current: [...]</p>
+            <p id="answered">Answered: [...]</p>
+            <p id="skipped">Skipped: [...]</p>
+            <p id="currentScore">Score: [...]</p>
+        </div>
+        <div class="debug-section">
+            <div class="debug-section-title">Misc</div>
+            <p id="osInfo">OS: [...]</p>
+            <p id="browserInfo">Browser: [...]</p>
+            <p id="screenInfo">Screen: [...]</p>
+            <p id="languageInfo">Language: [...]</p>
+            <p id="timezoneInfo">Timezone: [...]</p>
+            <p id="userAgent">UserAgent: [...]</p>
+        </div>
     </div>
 </body>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>

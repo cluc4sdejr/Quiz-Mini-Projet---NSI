@@ -935,18 +935,73 @@ p {
     top: 0;
     position: absolute;
     width: auto;
-    padding: 5px;
-    background: rgba(0, 0, 0, 0.5);
+    max-width: 480px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.75);
     font-family: monospace;
     z-index: 1000;
     display: none;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.debug-section {
+    margin-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 7px;
+}
+
+.debug-section:last-child {
+    margin-bottom: 0;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.debug-section-title {
+    color: rgb(180, 180, 180);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    margin-top: 2px;
 }
 
 .debug-container p {
-    color: rgb(255, 255, 255) !important;
-    font-size: small;
+    color: rgb(220, 220, 220) !important;
+    font-size: 13px;
+    margin: 3px 0;
+    line-height: 1.68;
+    word-break: break-word;
 }
 
 .debugFileName {
-    color: rgb(255, 122, 122);
+    color: rgb(100, 200, 255);
+}
+
+.debug-file-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 5px;
+}
+
+.debug-btn {
+    background-color: rgba(100, 150, 200, 0.6);
+    color: rgb(220, 220, 220);
+    border: 1px solid rgba(100, 150, 200, 0.8);
+    padding: 4px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    border-radius: 3px;
+    font-family: monospace;
+    transition: all 150ms ease;
+}
+
+.debug-btn:hover {
+    background-color: rgba(100, 150, 200, 0.8);
+    border-color: rgba(100, 150, 200, 1);
+}
+
+.debug-btn:active {
+    transform: scale(0.98);
 }

@@ -14,9 +14,14 @@ $(document).ready(function () {
         var allQuestions = data.questions;
         var metaTitle = data.meta.title;
         var metaDescription = data.meta.description;
-        var metaAuthorId = data.meta.authorId;
+        var metaAuthor = data.meta.author;
         var metaDifficulty = data.meta.difficulty;
         var keys = Object.keys(allQuestions);
+
+        $('#metaTitle').text(metaTitle);
+        $('#metaDescription').text(metaDescription);
+        $('#metaAuthorId').text(metaAuthor);
+        $('#metaDifficulty').text(metaDifficulty);
 
         for (var i = 0; i < keys.length; i++) {
             var key = keys[i];

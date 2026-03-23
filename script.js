@@ -65,7 +65,6 @@ function getSystemInfo() {
 $(document).ready(function () {
     var jsonUrl = 'questions.json';
 
-    // Check if there's imported data in localStorage
     var importedData = localStorage.getItem('importedQuizData');
     var dataSource = 'original';
     var dataToLoad = null;
@@ -75,12 +74,10 @@ $(document).ready(function () {
             dataToLoad = JSON.parse(importedData);
             dataSource = 'imported';
         } catch(e) {
-            // If parsing fails, fall back to original
             dataToLoad = null;
         }
     }
     
-    // If we have imported data, use it directly; otherwise load from file
     if (dataToLoad) {
         processQuizData(dataToLoad, dataSource);
     } else {
@@ -212,7 +209,7 @@ $(document).ready(function () {
                 img.src = imagesToLoad[k];
             }
         }
-    } // End of processQuizData function
+    }
 
         var currentZoom = 1;
         var isDragging = false;

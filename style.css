@@ -938,9 +938,12 @@ p {
     padding: 5px;
     background: black;
     font-family: monospace;
-    color: white !important;
     z-index: 1000;
     display: none;
+}
+
+.debug-container p {
+    color: white !important;
 }
 
 .debugFileName {

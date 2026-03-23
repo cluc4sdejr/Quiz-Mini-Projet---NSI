@@ -1,6 +1,6 @@
 @font-face {
   font-family: "hugeicons-stroke-rounded";
-  src: url("assets/hgi-stroke-rounded.eot") format("embedded-opentype"), url("assets/hgi-stroke-rounded.woff2") format("woff2"), url("assets/hgi-stroke-rounded.woff") format("woff"), url("assets/hgi-stroke-rounded.ttf") format("truetype"), url("assets/hgi-stroke-rounded.svg#hugeicons-stroke-rounded") format("svg"); /* iOS 4.1- */
+  src: url("assets/hgi-stroke-rounded.eot") format("embedded-opentype"), url("assets/hgi-stroke-rounded.woff2") format("woff2"), url("assets/hgi-stroke-rounded.woff") format("woff"), url("assets/hgi-stroke-rounded.ttf") format("truetype"), url("assets/hgi-stroke-rounded.svg#hugeicons-stroke-rounded") format("svg");
 }
 .hgi-stroke {
   font-family: "hugeicons-stroke-rounded" !important;

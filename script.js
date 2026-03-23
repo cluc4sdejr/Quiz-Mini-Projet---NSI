@@ -311,7 +311,7 @@ $(document).ready(function () {
                 link.click();
                 document.body.removeChild(link);
                 URL.revokeObjectURL(url);
-                showToast('Quiz téléchargé');
+                showToast('Quiz téléchargé', 'success');
             });
         });
         
@@ -328,12 +328,12 @@ $(document).ready(function () {
                         var importedData = JSON.parse(event.target.result);
                         if (importedData.questions && importedData.meta) {
                             localStorage.setItem('importedQuizData', JSON.stringify(importedData));
-                            showToast('Quiz Importé ! Actualise pour appliquer.');
+                            showToast('Quiz Importé ! Actualise pour appliquer.', 'success');
                         } else {
-                            showToast('Format de quizz invalide.');
+                            showToast('Format de quizz invalide.', 'error');
                         }
                     } catch(err) {
-                        showToast('Erreur lors de la lecture du fichier.');
+                        showToast('Erreur lors de la lecture du fichier.', 'error');
                     }
                 };
                 reader.readAsText(file);
@@ -343,7 +343,7 @@ $(document).ready(function () {
         
         $('#btn-reset-quiz').off('click').click(function() {
             localStorage.removeItem('importedQuizData');
-            showToast('Les données ont étées supprimées avec succès !');
+            showToast('Les données ont étées supprimées avec succès !', 'success');
         });
     });
 
@@ -384,7 +384,20 @@ function updateDebugInfo() {
     $('#currentScore').text('Score: ' + score);
 }
 
-function showToast(message, iconClass = "hgi hgi-stroke hgi-next") {
+function showToast(message, variant = "default") {
+    var iconHTML = '';
+    var variantClass = 'toast-' + variant;
+    
+    if (variant === 'success') {
+        iconHTML = '<i class="hgi hgi-stroke hgi-tick-02"></i>';
+    } else if (variant === 'error') {
+        iconHTML = '<i class="hgi hgi-stroke hgi-cancel-01"></i>';
+    } else if (variant === 'warn') {
+        iconHTML = '<i class="hgi hgi-stroke hgi-alert-02"></i>';
+    } else {
+        iconHTML = '<i class="hgi hgi-stroke hgi-information-circle"></i>';
+    }
+    
     var $existingToast = $('#toast-container .toast');
 
     if ($existingToast.length > 0) {
@@ -413,12 +426,10 @@ function showToast(message, iconClass = "hgi hgi-stroke hgi-next") {
     }
 
     toastCount = 1;
-    var $toast = $('<div>', { class: 'toast' });
-    var $iconSpan = $('<span>', { class: 'toast-icon' });
-    var $icon = $('<i>', { class: iconClass });
+    var $toast = $('<div>', { class: 'toast ' + variantClass });
+    var $iconSpan = $('<span>', { class: 'toast-icon' }).html(iconHTML);
     var $messageSpan = $('<span>', { class: 'toast-message' }).text(message);
 
-    $iconSpan.append($icon);
     $toast.append($iconSpan).append($messageSpan);
 
     $('#toast-container').empty().append($toast);
@@ -652,7 +663,7 @@ function showQuizStep() {
     $('#btn-skip').off('click').click(function () {
         skippedIndices.push(index);
         saveProgress();
-        showToast('Question mise de côté');
+        showToast('Question mise de côté', 'warn');
         updateDebugInfo();
         goToNextStep();
     });

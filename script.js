@@ -19,10 +19,10 @@ $(document).ready(function () {
         var keys = Object.keys(allQuestions);
 
         $('#debugTitle').html('Fetched from: ' + '<span class="debugFileName">' + jsonUrl + '</span>');
-        $('#metaTitle').text(metaTitle);
-        $('#metaDescription').text(metaDescription);
-        $('#metaAuthor').text(metaAuthor);
-        $('#metaDifficulty').text(metaDifficulty);
+        $('#metaTitle').text('Title:' + metaTitle);
+        $('#metaDescription').text('Description:' + metaDescription);
+        $('#metaAuthor').text('Author:' + metaAuthor);
+        $('#metaDifficulty').text('Difficulty (id):' + metaDifficulty);
 
         for (var i = 0; i < keys.length; i++) {
             var key = keys[i];

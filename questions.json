@@ -3,7 +3,7 @@
         "title": "Questions basées sur le Langage Web",
         "description": "Questionnaire débutant",
         "author": "One pound fish",
-        "difficulty": "Facile"
+        "difficulty": 1
     },
     "questions": {
         "001": {

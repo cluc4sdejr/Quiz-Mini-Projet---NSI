@@ -16,6 +16,7 @@ $(document).ready(function () {
         var metaDescription = data.meta.description;
         var metaAuthor = data.meta.author;
         var metaDifficulty = data.meta.difficulty;
+        var userAgent = navigator.userAgent;
         var keys = Object.keys(allQuestions);
 
         $('#debugTitle').html('Fetched from: ' + '<span class="debugFileName">' + jsonUrl + '</span>');
@@ -23,6 +24,7 @@ $(document).ready(function () {
         $('#metaDescription').text('Description: ' + metaDescription);
         $('#metaAuthor').text('Author: ' + metaAuthor);
         $('#metaDifficulty').text('Difficulty (id): ' + metaDifficulty);
+        $('#userAgent').text('userAgent: ' + userAgent)
 
         for (var i = 0; i < keys.length; i++) {
             var key = keys[i];

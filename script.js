@@ -596,12 +596,9 @@ function showFinalResults() {
 
 var easter_egg = new Konami(function() { 
     $('.debug-container').show();
-});
-
-if($(".debug-container").is(":visible")) {
     document.addEventListener('keydown', function(event) {
         if (event.key === 'Escape') {
             $('debug-container').hide();
         }
     })
-}
+});

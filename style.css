@@ -934,7 +934,10 @@ p {
     left: 0;
     top: 0;
     position: absolute;
-    width: 100px;
-    background: pink;
+    width: auto;
+    padding: 10px;
+    background: black;
+    color: white;
     z-index: 1000;
+    display: none;
 }

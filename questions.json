@@ -1,9 +1,11 @@
 {
     "meta": {
-        "title": "Questions basées sur le Langage Web",
-        "description": "Questionnaire débutant",
-        "author": "One pound fish",
-        "difficulty": 1
+        "title": "L'Univers du Langage Web",
+        "description": "Questionnaire débutant sur l'univers du Langage Web.",
+        "author": "LUC4S",
+        "difficulty": 1,
+        "version": "i dunno",
+        "creationDate": 1774269240
     },
     "questions": {
         "001": {

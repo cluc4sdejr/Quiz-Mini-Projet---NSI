@@ -16,15 +16,37 @@ $(document).ready(function () {
         var metaDescription = data.meta.description;
         var metaAuthor = data.meta.author;
         var metaDifficulty = data.meta.difficulty;
+        var metaCreationDate = data.meta.creationDate;
+        var metaVersion = data.meta.version;
         var userAgent = navigator.userAgent;
         var keys = Object.keys(allQuestions);
+
+        // Source - https://stackoverflow.com/a/31316397
+        // Posted by Finny Abraham
+        // Retrieved 2026-03-23, License - CC BY-SA 3.0
+        // Reworked on 23-03-2026 at 1:41PM
+
+        var timestampInMilliSeconds = metaCreationDate*1000;
+        var date = new Date(timestampInMilliSeconds);
+
+        var day = (date.getDate() < 10 ? '0' : '') + date.getDate();
+        var month = (date.getMonth() < 9 ? '0' : '') + (date.getMonth() + 1);
+        var year = date.getFullYear();
+
+        var hours = ((date.getHours() % 12 || 12) < 10 ? '0' : '') + (date.getHours() % 12 || 12);
+        var minutes = (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
+        var meridiem = (date.getHours() >= 12) ? 'PM' : 'AM';
+
+        var formattedDate = day + '-' + month + '-' + year + ' at ' + hours + ':' + minutes + ' ' + meridiem;
 
         $('#debugTitle').html('Fetched from: ' + '<span class="debugFileName">' + jsonUrl + '</span>');
         $('#metaTitle').text('Title: ' + metaTitle);
         $('#metaDescription').text('Description: ' + metaDescription);
         $('#metaAuthor').text('Author: ' + metaAuthor);
         $('#metaDifficulty').text('Difficulty (id): ' + metaDifficulty);
-        $('#userAgent').text('userAgent: ' + userAgent)
+        $('#userVersion').text('Version: ' + userAgent)
+        $('#metaCreationDate').text('[UNIX] Created on: ' + formattedDate)
+        $('#userAgent').text('UserAgent detected: ' + userAgent)
 
         console.log(userAgent);
 
@@ -197,7 +219,7 @@ function saveProgress() {
     localStorage.setItem('quiz', jsonString);
 }
 
-function showToast(message, iconClass = 'hgi hgi-stroke hgi-next') {
+function showToast(message, iconClass = "hgi hgi-stroke hgi-next") {
     var $existingToast = $('#toast-container .toast');
 
     if ($existingToast.length > 0) {

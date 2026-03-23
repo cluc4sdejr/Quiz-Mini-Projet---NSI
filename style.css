@@ -936,17 +936,17 @@ p {
     position: absolute;
     width: auto;
     padding: 5px;
-    background: rgba(0, 0, 0, 0.226);
+    background: rgba(0, 0, 0, 0.5);
     font-family: monospace;
     z-index: 1000;
     display: none;
 }
 
 .debug-container p {
-    color: rgb(0, 0, 0) !important;
+    color: rgb(255, 255, 255) !important;
     font-size: small;
 }
 
 .debugFileName {
-    color: rgb(167, 80, 80);
+    color: rgb(255, 122, 122);
 }

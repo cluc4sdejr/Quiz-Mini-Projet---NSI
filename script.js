@@ -12,6 +12,10 @@ $(document).ready(function () {
 
     $.getJSON(jsonUrl, function (data) {
         var allQuestions = data.questions;
+        var metaTitle = data.meta.title;
+        var metaDescription = data.meta.description;
+        var metaAuthorId = data.meta.authorId;
+        var metaDifficulty = data.meta.difficulty;
         var keys = Object.keys(allQuestions);
 
         for (var i = 0; i < keys.length; i++) {
@@ -579,3 +583,7 @@ function showFinalResults() {
         location.reload();
     });
 }
+
+var easter_egg = new Konami(function() { 
+    alert('Konami code!');
+});

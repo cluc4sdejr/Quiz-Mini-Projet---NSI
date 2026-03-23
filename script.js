@@ -26,6 +26,8 @@ $(document).ready(function () {
         $('#metaDifficulty').text('Difficulty (id): ' + metaDifficulty);
         $('#userAgent').text('userAgent: ' + userAgent)
 
+        console.log(userAgent);
+
         for (var i = 0; i < keys.length; i++) {
             var key = keys[i];
             var item = allQuestions[key];

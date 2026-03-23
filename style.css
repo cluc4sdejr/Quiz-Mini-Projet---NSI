@@ -938,7 +938,11 @@ p {
     padding: 5px;
     background: black;
     font-family: monospace;
-    color: white;
+    color: white !important;
     z-index: 1000;
     display: none;
+}
+
+.debugFileName {
+    color: rgb(255, 179, 179);
 }

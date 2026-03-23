@@ -18,7 +18,7 @@ $(document).ready(function () {
         var metaDifficulty = data.meta.difficulty;
         var keys = Object.keys(allQuestions);
 
-        $('#debugTitle').text('Fetched from:' + jsonUrl);
+        $('#debugTitle').html('Fetched from: ' + '<span class="debugFileName">' + jsonUrl + '</span>');
         $('#metaTitle').text(metaTitle);
         $('#metaDescription').text(metaDescription);
         $('#metaAuthor').text(metaAuthor);

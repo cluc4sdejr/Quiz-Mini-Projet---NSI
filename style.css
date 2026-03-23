@@ -940,6 +940,7 @@ p {
     font-family: monospace;
     z-index: 1000;
     display: none;
+    font-size: small;
 }
 
 .debug-container p {

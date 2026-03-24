@@ -407,10 +407,7 @@ p {
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.zoom-btn svg {
-    transition: transform 300ms ease;
+    font-family: "Poppins", sans-serif;
 }
 
 .q-media:hover .zoom-btn {
@@ -421,10 +418,6 @@ p {
 .zoom-btn:hover {
     background: rgba(0, 0, 0, 0.8);
     border-color: rgba(255, 255, 255, 0.4);
-}
-
-.zoom-btn:hover svg {
-    transform: scale(1.1);
 }
 
 .zoom-modal {
@@ -1048,8 +1041,4 @@ p {
 
 .debug-btn:active {
     transform: scale(0.98);
-}
-
-span {
-    font-family: "Poppins", sans-serif !important;
 }

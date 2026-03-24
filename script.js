@@ -761,8 +761,10 @@ function showFinalResults() {
         message = 'Quasi perfect ça je reconnais ^^';
     } else if (finalPercent >= 60) {
         message = 'Ehh t\'es bon, t\'es bon ! (mais pas assez)';
-    } else if (finalPercent >= 40) {
-        message = 'Franchement pas mal';
+    } else if (finalPercent >= 50) {
+        message = "Alors, c'est ni mauvais, ni bon (abruti)";
+    } else if (finalPercent >= 20) {
+        message = 'Bro pensait cook, il a burn.';
     } else {
         message = 'Fréro.. t\'abuses franchement.';
     }

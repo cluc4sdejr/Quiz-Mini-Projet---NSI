@@ -69,6 +69,10 @@ body {
     background: #bda84b;
 }
 
+body.dark .p-step.skipped {
+    filter: invert(1);
+}
+
 .p-step.skipped.current {
     animation: pulse-orange 1.5s infinite ease-in-out;
 }
@@ -462,6 +466,10 @@ body.dark .q-media video {
     justify-content: center;
     align-items: center;
     overflow: hidden;
+}
+
+body.dark .zoom-wrapper {
+    filter: invert(1);
 }
 
 #zoomImage {

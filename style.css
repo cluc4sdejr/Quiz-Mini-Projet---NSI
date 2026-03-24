@@ -916,6 +916,7 @@ body.dark .q-media video {
     height: 32px;
     border-radius: 50%;
     color: #bda84b;
+    filter: invert(1);
 }
 
 .toast-message {

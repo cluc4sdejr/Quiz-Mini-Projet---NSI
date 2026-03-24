@@ -314,6 +314,11 @@ $(document).ready(function () {
                 showToast('Quiz téléchargé', 'success');
             });
         });
+
+        $('#btn-save-quiz').off('click').click(function() {
+            $('body').attr('class', 'dark').hasClass( "" )
+            $('body').attr('class', '').hasClass( "dark" )
+        });
         
         $('#btn-import-quiz').off('click').click(function() {
             $('#quiz-file-input').click();

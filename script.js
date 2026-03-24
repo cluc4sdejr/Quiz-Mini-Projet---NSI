@@ -315,9 +315,13 @@ $(document).ready(function () {
             });
         });
 
-        $('#btn-save-quiz').off('click').click(function() {
-            $('body').attr('class', 'dark').hasClass( "" )
-            $('body').attr('class', '').hasClass( "dark" )
+        $('#btn-theme').off('click').click(function() {
+            if ($('body').hasClass("dark")) {
+                $('body').attr('class', '')
+            }
+            else {
+                $('body').attr('class', 'dark')
+            }
         });
         
         $('#btn-import-quiz').off('click').click(function() {

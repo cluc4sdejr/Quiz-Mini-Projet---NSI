@@ -13,6 +13,10 @@ body {
     font-family: "Poppins", sans-serif;
 }
 
+.dark {
+    filter: invert(1);
+}
+
 .whole {
     display: flex;
     flex-direction: column;
@@ -377,6 +381,11 @@ p {
     object-fit: contain;
     border-radius: 6px;
     transition: all ease-in-out 200ms;
+}
+
+body.dark .q-media img,
+body.dark .q-media video {
+    filter: invert(1);
 }
 
 .q-media img {

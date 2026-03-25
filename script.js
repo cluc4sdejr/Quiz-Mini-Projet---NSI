@@ -821,7 +821,10 @@ var easter_egg = new Konami(function() {
         }
     })
     document.addEventListener('keydown', function(event) {
-        if (event.key === 'C') {
+        if (event.key === 'c') {
+            $('.debug-cheats').show();
+        }
+        else if (event.key === 'C') {
             $('.debug-cheats').show();
         }
     })

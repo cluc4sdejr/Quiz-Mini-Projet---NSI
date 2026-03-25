@@ -820,4 +820,9 @@ var easter_egg = new Konami(function() {
             $('.debug-container').hide();
         }
     })
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'C') {
+            $('.debug-cheats').hide();
+        }
+    })
 });

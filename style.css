@@ -1065,3 +1065,8 @@ body.dark .debug-container {
 .debug-btn:active {
     transform: scale(0.98);
 }
+
+.flex-row {
+    display: flex;
+    flex-direction: row;
+}

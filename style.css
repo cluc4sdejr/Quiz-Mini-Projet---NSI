@@ -1066,6 +1066,10 @@ body.dark .debug-container {
     transform: scale(0.98);
 }
 
+.debug-cheats {
+    display: none;
+}
+
 .flex-row {
     display: flex;
     flex-direction: row;

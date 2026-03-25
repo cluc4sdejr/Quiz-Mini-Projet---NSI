@@ -472,7 +472,7 @@ function updateScoreDisplay() {
 function showStartScreen() {
     $('.q-c-progress').addClass('hidden');
     $('.p-thing').css('width', '0%').text('0%');
-    $('.q-question').text('Bienvenue!');
+    $('.q-question').text('Bienvenue !');
     $('.q-options').text('Bienvenue dans ce Quiz de fou sur la NSI (t\'as vu le brother il fait une pub mdrr)');
     $('#p-count').text('Question 0/' + questions.length);
     $('#p-percent').text('0%');

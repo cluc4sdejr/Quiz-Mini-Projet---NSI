@@ -6,7 +6,11 @@
         "difficulty": 1,
         "version": "i dunno",
         "creationDate": 1774269240,
-        "coverImage": "assets/html_button.png"
+        "coverImage": "assets/html_button.png",
+        "welcome": {
+            "title": "Bienvenue !",
+            "description": "Bienvenue dans ce Quiz de fou sur la NSI (t'as vu le brother il fait une pub mdrr)"
+        }
     },
     "questions": {
         "001": {

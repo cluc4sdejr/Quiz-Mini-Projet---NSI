@@ -1,12 +1,16 @@
 {
     "meta": {
-        "title": "L'Univers du Langage Web",
-        "description": "Questionnaire débutant sur l'univers du Langage Web.",
+        "title": "L'Univers des 9oo9ies",
+        "description": "Questionnaire débutant sur l'univers des 9oo9ies.",
         "author": "LUC4S",
         "difficulty": 1,
         "version": "i dunno",
         "creationDate": 1774269240,
-        "coverImage": "assets/html_button.png"
+        "coverImage": "assets/9oo9ies.png",
+        "welcome": {
+            "title": "Bienvenue dans l'Univers des 9oo9ies !",
+            "description": "Prépare-toi à un voyage intergalactique à travers notre questionnaire exclusif sur la NSI."
+        }
     },
     "questions": {
         "001": {

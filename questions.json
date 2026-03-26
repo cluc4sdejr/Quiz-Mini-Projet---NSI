@@ -117,17 +117,6 @@
                 "&lt;footer&gt;"
             ],
             "answerArray": "2"
-        },
-        "011": {
-            "question": "Quelle balise entoure tout le contenu visible d'une page ?",
-            "media": "assets/html_body.png",
-            "mediaType": "image",
-            "answers": [
-                "&lt;head&gt;",
-                "&lt;body&gt;",
-                "&lt;footer&gt;"
-            ],
-            "answerArray": "2"
         }
     }
 }

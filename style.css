@@ -1119,14 +1119,14 @@ body.dark .debug-container {
     align-items: stretch;
     background: white;
     width: 100vw;
-    padding: 0 24px;
+    padding: 0 30px;
     box-sizing: border-box;
 }
 
 .landing-nav {
     display: flex;
     gap: 16px;
-    padding: 20px 0;
+    padding: 30px 0;
     background: white;
     margin: 0;
     width: 100%;

@@ -14,114 +14,40 @@
     },
     "questions": {
         "001": {
-            "question": "Quel est l'élement pour créer un bouton natif en HTML?",
-            "media": "assets/html_button.png",
+            "question": "Qui a créé le meme 9oo9ies?",
+            "media": "assets/9oo9ies.png",
             "mediaType": "image",
             "answers": [
-                "&lt;div&gt;",
-                "&lt;select&gt;",
-                "&lt;button&gt;"
+                "Anus",
+                "Samey",
+                "Lucaca",
+                "Narjelesque"
             ],
-            "answerArray": "3"
+            "answerArray": "4"
         },
         "002": {
-            "question": "Quelle balise HTML utilise-t-on pour faire un grand titre sur la page ?",
-            "media": "assets/html_title.png",
+            "question": "Qui est le \"9oo9iesé\"",
+            "media": "assets/9oo9ies.png",
             "mediaType": "image",
             "answers": [
-                "&lt;h1&gt;",
-                "&lt;p&gt;",
-                "&lt;title&gt;"
+                "Anus",
+                "Samey",
+                "Lucaca",
+                "Encore Narjelesque"
             ],
-            "answerArray": "1"
+            "answerArray": "4"
         },
         "003": {
-            "question": "Quelle est la couleur du texte avec 'color: red;' en CSS ?",
-            "media": "assets/css_color.png",
+            "question": "Qui fait des sites en HTML bad bien codés comme celui-ci?",
+            "media": "https://i.pinimg.com/originals/0d/ac/06/0dac06a5332d13e2a4e2dc30ba0c6411.gif",
             "mediaType": "image",
             "answers": [
-                "Bleu",
-                "Vert",
-                "Rouge"
+                "Anus",
+                "Samey",
+                "Lucaca",
+                "Encore ENCORE Narjelesque ????"
             ],
             "answerArray": "3"
-        },
-        "004": {
-            "question": "En JavaScript, comment écrit-on 'Bonjour' dans une alerte ?",
-            "media": "assets/js_alert.png",
-            "mediaType": "image",
-            "answers": [
-                "alert('Bonjour');",
-                "message('Bonjour');",
-                "say('Bonjour');"
-            ],
-            "answerArray": "1"
-        },
-        "005": {
-            "question": "Quelle balise permet d'insérer une image ?",
-            "media": "assets/html_image.png",
-            "mediaType": "image",
-            "answers": [
-                "&lt;img&gt;",
-                "&lt;pic&gt;",
-                "&lt;image&gt;"
-            ],
-            "answerArray": "1"
-        },
-        "006": {
-            "question": "Quel symbole utilise-t-on pour un ID en CSS ?",
-            "media": "assets/css_id.png",
-            "mediaType": "image",
-            "answers": [
-                ".",
-                "#",
-                "@"
-            ],
-            "answerArray": "2"
-        },
-        "007": {
-            "question": "Quelle balise crée un lien vers une autre page ?",
-            "media": "assets/html_link.png",
-            "mediaType": "image",
-            "answers": [
-                "&lt;link&gt;",
-                "&lt;href&gt;",
-                "&lt;a&gt;"
-            ],
-            "answerArray": "3"
-        },
-        "008": {
-            "question": "Quel est le signe pour multiplier en JavaScript ?",
-            "media": "assets/js_times.png",
-            "mediaType": "image",
-            "answers": [
-                "x",
-                "*",
-                "+"
-            ],
-            "answerArray": "2"
-        },
-        "009": {
-            "question": "Où met-on le code CSS d'habitude ?",
-            "media": "assets/css_filename.png",
-            "mediaType": "image",
-            "answers": [
-                "Dans un fichier .css",
-                "Dans un fichier .jpg",
-                "Dans un fichier .txt"
-            ],
-            "answerArray": "1"
-        },
-        "010": {
-            "question": "Quelle balise entoure tout le contenu visible d'une page ?",
-            "media": "assets/html_body.png",
-            "mediaType": "image",
-            "answers": [
-                "&lt;head&gt;",
-                "&lt;body&gt;",
-                "&lt;footer&gt;"
-            ],
-            "answerArray": "2"
         }
     }
 }

@@ -1641,8 +1641,9 @@ body.dark .debug-container {
 
 .recommanded-options {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 10px;
+    width: 100%;
 }
 
 .r-card {

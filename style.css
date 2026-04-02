@@ -1638,3 +1638,15 @@ body.dark .debug-container {
         left: 10px;
     }
 }
+
+.recommanded-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.r-card {
+    display: flex;
+    padding: 10px;
+    background: pink;
+}

@@ -78,7 +78,7 @@ $(document).ready(function () {
         }
     }
 
-    if (!window.currentQuizId) {
+    if (!window.currentQuizId && $('.q-container').length > 0) {
         if (dataToLoad) {
             processQuizData(dataToLoad, dataSource);
         } else {
@@ -89,6 +89,13 @@ $(document).ready(function () {
     }
 
     function processQuizData(data, source) {
+        questions = [];
+        index = 0;
+        answers = {};
+        score = 0;
+        skippedIndices = [];
+        isFinishing = false;
+        
         window.quizData = data;
         dataSource = source;
         var allQuestions = data.questions;
@@ -298,19 +305,30 @@ $(document).ready(function () {
     var quizDataForSave = null;
 
     $('#btn-save-quiz').off('click').click(function () {
-        $.getJSON('questions.json', function (data) {
-            var dataStr = JSON.stringify(data, null, 2);
-            var dataBlob = new Blob([dataStr], { type: 'application/json' });
-            var url = URL.createObjectURL(dataBlob);
-            var $link = $('<a>', {
-                href: url,
-                download: 'questions-backup-' + new Date().getTime() + '.json'
-            }).appendTo('body');
-            $link[0].click();
-            $link.remove();
-            URL.revokeObjectURL(url);
-            showToast('Quiz téléchargé', 'success');
-        });
+        var quizId = window.currentQuizId;
+        var quizData = window.quizData;
+        
+        if (!quizData) {
+            showToast('Aucun quiz chargé', 'error');
+            return;
+        }
+        
+        var filename = 'quiz-backup-' + new Date().getTime() + '.json';
+        if (quizData.meta && quizData.meta.title) {
+            filename = quizData.meta.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.json';
+        }
+        
+        var dataStr = JSON.stringify(quizData, null, 2);
+        var dataBlob = new Blob([dataStr], { type: 'application/json' });
+        var url = URL.createObjectURL(dataBlob);
+        var $link = $('<a>', {
+            href: url,
+            download: filename
+        }).appendTo('body');
+        $link[0].click();
+        $link.remove();
+        URL.revokeObjectURL(url);
+        showToast('Quiz téléchargé: ' + filename, 'success');
     });
 
     $('#btn-theme').off('click').click(function () {
@@ -805,9 +823,10 @@ function showFinalResults() {
     $resultsCard.append($scoreDisplay).append($resultsMessage);
     $resultsContainer.append($resultsTitle).append($resultsCard);
 
-    $('.q-question').empty().append($resultsContainer);
-    $('.q-options').empty();
+    $('.q-question').html('').append($resultsContainer);
+    $('.q-options').html('');
     $('.q-media').remove();
+    $('.q-option').remove();
 
     $('#p-count').text('Question ' + total + '/' + total);
     $('#p-percent').text('100%');
@@ -815,13 +834,21 @@ function showFinalResults() {
 
     $('.p-thing').css('width', '100%').text('100%');
     $('#btn-validate').text('Recommencer').removeClass('hidden');
-    $('#btn-skip').addClass('hidden');
+    $('#btn-skip').text('Quiz suivant →').removeClass('hidden');
 
     $('#btn-validate').off('click');
     $('#btn-validate').click(function () {
         var quizId = window.currentQuizId || "default";
         localStorage.removeItem('quiz_progress_' + quizId);
-        location.reload();
+        if (window.quizData) {
+            initializeQuizFromData(window.quizData);
+        }
+    });
+    
+    $('#btn-skip').off('click');
+    $('#btn-skip').click(function () {
+        var currentQuizId = window.currentQuizId || "default";
+        getNextQuizAndLoad(currentQuizId);
     });
 
     updateDebugInfo();
@@ -839,6 +866,21 @@ var easter_egg = new Konami(function () {
     $(document).on('keydown', function (event) {
         if (event.key === 'c' || event.key === 'C') {
             $('.debug-cheats').show();
+        }
+    });
+});
+
+$(document).ready(function() {
+    if (!$('.debug-toggle-btn').length) {
+        $('<button class="debug-toggle-btn">🔧 Debug</button>').appendTo('body');
+    }
+    
+    $(document).on('click', '.debug-toggle-btn', function() {
+        var $debugContainer = $('.debug-container');
+        if ($debugContainer.is(':visible')) {
+            $debugContainer.hide();
+        } else {
+            $debugContainer.show();
         }
     });
 });
@@ -964,4 +1006,242 @@ function initializeQuizFromData(quizData) {
             img.src = imagesToLoad[k];
         }
     }
+};
+
+function openCreateQuizModal() {
+    $('#createQuizModal').removeClass('hidden');
+    $('#questionsContainer').empty();
+    addQuestion();
+}
+
+function closeCreateQuizModal() {
+    $('#createQuizModal').addClass('hidden');
+    $('#quizCreatorForm')[0].reset();
+}
+
+function addQuestion() {
+    var questionCount = $('#questionsContainer .question-item').length + 1;
+    var questionId = 'q-' + questionCount;
+    
+    var questionHTML = '<div class="question-item" data-question-id="' + questionId + '">' +
+        '<div class="question-number">Question ' + questionCount + '</div>' +
+        '<div class="question-input-group">' +
+        '<label for="' + questionId + '-text">Énoncé de la question</label>' +
+        '<input type="text" id="' + questionId + '-text" name="' + questionId + '-text" class="question-text" placeholder="Posez votre question..." required>' +
+        '<fieldset class="answer-options">' +
+        '<legend>Réponses (au moins 2, indiquez la bonne réponse)</legend>' +
+        '<div class="answer-option">' +
+        '<input type="radio" id="' + questionId + '-radio1" name="' + questionId + '-correct" value="1">' +
+        '<label for="' + questionId + '-radio1">Correcte</label>' +
+        '<input type="text" id="' + questionId + '-ans1" name="' + questionId + '-ans1" class="answer-text" placeholder="Réponse 1" required>' +
+        '</div>' +
+        '<div class="answer-option">' +
+        '<input type="radio" id="' + questionId + '-radio2" name="' + questionId + '-correct" value="2">' +
+        '<label for="' + questionId + '-radio2">Correcte</label>' +
+        '<input type="text" id="' + questionId + '-ans2" name="' + questionId + '-ans2" class="answer-text" placeholder="Réponse 2" required>' +
+        '</div>' +
+        '<div class="answer-option">' +
+        '<input type="radio" id="' + questionId + '-radio3" name="' + questionId + '-correct" value="3">' +
+        '<label for="' + questionId + '-radio3">Correcte</label>' +
+        '<input type="text" id="' + questionId + '-ans3" name="' + questionId + '-ans3" class="answer-text" placeholder="Réponse 3 (optionnel)">' +
+        '</div>' +
+        '<div class="answer-option">' +
+        '<input type="radio" id="' + questionId + '-radio4" name="' + questionId + '-correct" value="4">' +
+        '<label for="' + questionId + '-radio4">Correcte</label>' +
+        '<input type="text" id="' + questionId + '-ans4" name="' + questionId + '-ans4" class="answer-text" placeholder="Réponse 4 (optionnel)">' +
+        '</div>' +
+        '</fieldset>' +
+        '</div>' +
+        '<button type="button" class="btn-remove-question" onclick="$(this).closest(\'.question-item\').remove(); updateQuestionNumbers();">Supprimer</button>' +
+        '</div>';
+    
+    $('#questionsContainer').append(questionHTML);
+}
+
+function updateQuestionNumbers() {
+    $('#questionsContainer .question-item').each(function(index) {
+        $(this).find('.question-number').text('Question ' + (index + 1));
+    });
+}
+
+function saveQuizToLocalStorage() {
+    var title = $('#quizTitle').val().trim();
+    var description = $('#quizDescription').val().trim();
+    var author = $('#quizAuthor').val().trim();
+    var difficulty = parseInt($('#quizDifficulty').val());
+    var coverImage = $('#quizCoverImage').val().trim();
+    var tagsInput = $('#quizTags').val().trim();
+    var tags = tagsInput ? tagsInput.split(',').map(function(tag) { return tag.trim(); }) : [];
+    
+    if (!title || !description || !author) {
+        showToast('Veuillez remplir tous les champs requis', 'error');
+        return;
+    }
+    
+    var questionsArray = {};
+    var questionNumber = 1;
+    var valid = true;
+    
+    $('#questionsContainer .question-item').each(function() {
+        var $item = $(this);
+        var questionId = $item.attr('data-question-id');
+        var questionText = $item.find('.question-text').val().trim();
+        
+        if (!questionText) {
+            showToast('Toutes les questions doivent avoir un énoncé', 'error');
+            valid = false;
+            return false;
+        }
+        
+        var answers = [];
+        var correctAnswerIndex = 0;
+        var hasSelected = false;
+        
+        $item.find('.answer-option').each(function(index) {
+            var answerText = $(this).find('.answer-text').val().trim();
+            if (answerText) {
+                answers.push(answerText);
+                var radio = $(this).find('input[type="radio"]');
+                if (radio.is(':checked')) {
+                    correctAnswerIndex = answers.length;
+                    hasSelected = true;
+                }
+            }
+        });
+        
+        if (answers.length < 2) {
+            showToast('Chaque question doit avoir au moins 2 réponses', 'error');
+            valid = false;
+            return false;
+        }
+        
+        if (!hasSelected) {
+            showToast('Sélectionnez une bonne réponse pour chaque question', 'error');
+            valid = false;
+            return false;
+        }
+        
+        var key = (questionNumber < 10 ? '00' : '0') + questionNumber;
+        questionsArray[key] = {
+            question: questionText,
+            answers: answers,
+            answerArray: String(correctAnswerIndex),
+            media: '',
+            mediaType: 'image'
+        };
+        questionNumber++;
+    });
+    
+    if (!valid || Object.keys(questionsArray).length === 0) {
+        return;
+    }
+    
+    var now = Math.floor(Date.now() / 1000);
+    var quizData = {
+        meta: {
+            title: title,
+            description: description,
+            author: author,
+            difficulty: difficulty,
+            version: '1.0',
+            creationDate: now,
+            coverImage: coverImage,
+            tags: tags
+        },
+        questions: questionsArray
+    };
+    
+    var quizId = 'custom_' + now;
+    localStorage.setItem('customQuiz_' + quizId, JSON.stringify(quizData));
+    
+    var customQuizzes = JSON.parse(localStorage.getItem('customQuizzes')) || [];
+    customQuizzes.push(quizId);
+    localStorage.setItem('customQuizzes', JSON.stringify(customQuizzes));
+    
+    showToast('Quiz créé avec succès!', 'success');
+    closeCreateQuizModal();
+    setTimeout(function() {
+        if (typeof loadAllQuizzes === 'function') {
+            loadAllQuizzes();
+        }
+    }, 500);
+}
+
+function getNextQuizAndLoad(currentQuizId) {
+    $.getJSON('./quiz/manifest.json', function(manifest) {
+        var allQuizzes = [...(manifest.quizzes || [])];
+        var customQuizzes = JSON.parse(localStorage.getItem('customQuizzes')) || [];
+        allQuizzes = allQuizzes.concat(customQuizzes);
+        
+        if (allQuizzes.length === 0) {
+            showToast('Aucun quiz suivant disponible', 'warn');
+            return;
+        }
+        
+        var currentIndex = allQuizzes.indexOf(currentQuizId);
+        var nextIndex = currentIndex + 1;
+        
+        if (nextIndex >= allQuizzes.length) {
+            nextIndex = 0;
+        }
+        
+        var nextQuizId = allQuizzes[nextIndex];
+        if (typeof window.loadQuiz === 'function') {
+            window.loadQuiz(nextQuizId);
+        } else {
+            showToast('Impossible de charger le quiz suivant', 'error');
+        }
+    }).fail(function() {
+        showToast('Erreur lors du chargement de la liste des quizzes', 'error');
+    });
+}
+
+$(document).ready(function() {
+    $('#quiz-creator-button').click(openCreateQuizModal);
+    $('#closeCreateQuiz').click(closeCreateQuizModal);
+    $('#cancelQuizBtn').click(closeCreateQuizModal);
+    
+    $('#addQuestionBtn').click(function(e) {
+        e.preventDefault();
+        addQuestion();
+    });
+    
+    $('#quizCreatorForm').submit(function(e) {
+        e.preventDefault();
+        saveQuizToLocalStorage();
+    });
+    
+    $(document).on('click', '.btn-export-json', function(e) {
+        e.stopPropagation();
+        var quizId = $(this).attr('data-quiz-id');
+        exportQuizToJSON(quizId);
+    });
+});
+
+function exportQuizToJSON(quizId) {
+    var quizData = localStorage.getItem('customQuiz_' + quizId);
+    if (!quizData) {
+        showToast('Quiz not found', 'error');
+        return;
+    }
+    
+    try {
+        var quiz = JSON.parse(quizData);
+        var jsonString = JSON.stringify(quiz, null, 2);
+        downloadJSON(jsonString, quiz.meta.title);
+        showToast('Quiz exported successfully!', 'success');
+    } catch (e) {
+        showToast('Error exporting quiz', 'error');
+        console.error(e);
+    }
+}
+
+function downloadJSON(content, filename) {
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:application/json;charset=utf-8,' + encodeURIComponent(content));
+    element.setAttribute('download', filename + '.json');
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
 }

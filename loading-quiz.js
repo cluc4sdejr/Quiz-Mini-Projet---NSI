@@ -6,19 +6,36 @@ async function loadAllQuizzes() {
     const $container = $('#quizCardsContainer');
     $container.empty();
 
-    if (!manifest.quizzes || manifest.quizzes.length === 0) {
+    let allQuizzes = [...(manifest.quizzes || [])];
+
+    const customQuizzes = JSON.parse(localStorage.getItem('customQuizzes')) || [];
+    
+    allQuizzes = allQuizzes.concat(customQuizzes);
+    
+    if (allQuizzes.length === 0) {
       $container.html('<p class="error-message">Aucun quiz disponible</p>');
       return;
     }
 
-    for (const quizId of manifest.quizzes) {
+    for (const quizId of allQuizzes) {
       try {
-        const quizData = await $.getJSON(`./quiz/${quizId}.json`);
-        const $card = createQuizCard(quizId, quizData);
-        $container.append($card);
+        let quizData;
+        if (quizId.startsWith('custom_')) {
+          quizData = JSON.parse(localStorage.getItem('customQuiz_' + quizId));
+        } else {
+          quizData = await $.getJSON(`./quiz/${quizId}.json`);
+        }
+        if (quizData) {
+          const $card = createQuizCard(quizId, quizData);
+          $container.append($card);
+        }
       } catch (error) {
         console.warn(`Erreur ou Quiz ${quizId} non trouvé:`, error);
       }
+    }
+
+    if ($container.find('.quiz-card').length === 0) {
+      $container.html('<p class="error-message">Aucun quiz disponible</p>');
     }
 
   } catch (error) {
@@ -101,11 +118,7 @@ function getDifficultyLabel(difficulty) {
 async function loadQuiz(quizId) {
   try {
     const templateHtml = await $.get('./quiz-template.html');
-    const quizData = await $.getJSON(`./quiz/${quizId}.json`);
-
-    window.quizData = quizData;
-    window.currentQuizId = quizId;
-
+    
     const $landing = $('#landing-page');
     if ($landing.length && !savedLandingPage) {
       savedLandingPage = $landing.clone(true, true);
@@ -123,14 +136,26 @@ async function loadQuiz(quizId) {
 
     $('body').prepend($backButton);
 
+    let quizData;
+    if (quizId.startsWith('custom_')) {
+      await new Promise(resolve => setTimeout(resolve, 800));
+      quizData = JSON.parse(localStorage.getItem('customQuiz_' + quizId));
+      if (!quizData) throw new Error('Quiz non trouvé');
+    } else {
+      quizData = await $.getJSON(`./quiz/${quizId}.json`);
+    }
+
+    window.quizData = quizData;
+    window.currentQuizId = quizId;
+
     if (typeof initializeQuizFromData === 'function') {
       initializeQuizFromData(quizData);
     } else {
-      console.error('❌ Fonction initializeQuizFromData non trouvée');
+      console.error('Fonction initializeQuizFromData non trouvée');
     }
   } catch (error) {
-    console.error('❌ Erreur lors du chargement du quiz:', error);
-    alert('Erreur : impossible de charger le quiz. ' + (error.statusText || error.message || 'Erreur inconnue'));
+    console.error('Erreur lors du chargement du quiz:', error);
+    alert('Impossible de charger le quiz. ' + (error.statusText || error.message || 'Erreur inconnue jsp ce qui se passe brother'));
     goBackToLanding();
   }
 }

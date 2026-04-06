@@ -49,17 +49,78 @@
         <div class="landing-hero">
             <div class="hero-content">
                 <h1>Apprends de façon goofy, tt simplement</h1>
-                <p>Allez bon perds pas de temps là et clique sur un Quizz puis fais-le.</p>
+                <p>Allez bon perds pas de temps là et clique sur un Quizz puis fais-le et speedrun-le si t'as envie.</p>
+                <p style="color: #ffffffa8 !important;">
+                    (ou alors tu en crées un toi-même, mais bon faut avoir le temps à part si t'es un professionnel à la BOTCH..)
+                </p>
             </div>
         </div>
         <div class="landing-container">
-            <h2 class="section-title">
-                <i class="hgi hgi-stroke hgi-clipboard"></i>
-                Les meilleurs quiz du monde (et aussi les seuls), c'est ici :
-            </h2>
+            <div class="section-header-row">
+                <h2 class="section-title">
+                    <i class="hgi hgi-stroke hgi-clipboard"></i>
+                    Les meilleurs quiz du monde (et aussi les seuls), c'est ici :
+                </h2>
+                <button id="quiz-creator-button" class="btn-create-quiz">
+                    <i class="hgi hgi-stroke hgi-plus"></i>
+                    Créer un quiz
+                </button>
+            </div>
             <div class="cards-container" id="quizCardsContainer">
                 <div class="loading-message">Chargement des quiz...</div>
             </div>
+        </div>
+    </div>
+
+    <div id="createQuizModal" class="modal hidden">
+        <div class="modal-content quiz-creator-form">
+            <div class="modal-header">
+                <h2>Créer un nouveau quiz</h2>
+                <button class="modal-close-btn" id="closeCreateQuiz">&times;</button>
+            </div>
+            <form id="quizCreatorForm">
+                <div class="form-group">
+                    <label for="quizTitle">Titre du quiz</label>
+                    <input type="text" id="quizTitle" name="quizTitle" placeholder="Ex: Les bases du HTML" required>
+                </div>
+                <div class="form-group">
+                    <label for="quizDescription">Description</label>
+                    <textarea id="quizDescription" name="quizDescription" placeholder="Décrivez votre quiz" rows="2" required></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="quizAuthor">Auteur</label>
+                        <input type="text" id="quizAuthor" name="quizAuthor" placeholder="Votre nom" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="quizDifficulty">Difficulté</label>
+                        <select id="quizDifficulty" name="quizDifficulty">
+                            <option value="1">Facile</option>
+                            <option value="2" selected>Moyen</option>
+                            <option value="3">Difficile</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="quizCoverImage">Image de couverture (URL)</label>
+                    <input type="url" id="quizCoverImage" name="quizCoverImage" placeholder="https://exemple.com/image.jpg">
+                </div>
+                <div class="form-group">
+                    <label for="quizTags">Tags (séparés par des virgules)</label>
+                    <input type="text" id="quizTags" name="quizTags" placeholder="Ex: html, css, web">
+                </div>
+                <div class="questions-section">
+                    <div class="section-header">
+                        <h3>Questions</h3>
+                        <button type="button" id="addQuestionBtn" class="btn-add-question">+ Ajouter question</button>
+                    </div>
+                    <div id="questionsContainer"></div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" id="cancelQuizBtn" class="btn-secondary">Annuler</button>
+                    <button type="submit" class="btn-primary">Créer le quiz</button>
+                </div>
+            </form>
         </div>
     </div>
 </body>

@@ -1,0 +1,26 @@
+{
+  "meta": {
+    "title": "Quizz temporaire",
+    "description": "C'est très dur genre vrm tu vas finir chokbar",
+    "author": "Auteur de fou",
+    "difficulty": 3,
+    "version": "1.0",
+    "creationDate": 1775561532,
+    "coverImage": "assets/exhausted_rosny.png",
+    "tags": []
+  },
+  "questions": {
+    "001": {
+      "question": "Ceci est une question \"questionnablement\" questionnable",
+      "answers": [
+        "Effectivement",
+        "Je n'ai pas compris",
+        "Je suis affirmativement dans la négation négativement négative",
+        "ok"
+      ],
+      "answerArray": "2",
+      "media": "assets/happy_rosny.png",
+      "mediaType": "image"
+    }
+  }
+}

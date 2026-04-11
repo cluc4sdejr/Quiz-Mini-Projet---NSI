@@ -7,6 +7,27 @@ var isFinishing = false;
 var toastTimer = null;
 var toastCount = 1;
 
+function shuffleArray(array) {
+    for (var i = array.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+}
+
+function shuffleQuizData(questionsArray) {
+    questionsArray.forEach(function (q) {
+        if (q.answers && q.answerArray) {
+            var correctIndex = parseInt(q.answerArray) - 1;
+            var correctText = q.answers[correctIndex];
+            shuffleArray(q.answers);
+            q.answerArray = String(q.answers.indexOf(correctText) + 1);
+        }
+    });
+    shuffleArray(questionsArray);
+}
+
 function getSystemInfo() {
     var userAgent = navigator.userAgent;
 
@@ -95,7 +116,7 @@ $(document).ready(function () {
         score = 0;
         skippedIndices = [];
         isFinishing = false;
-        
+
         window.quizData = data;
         dataSource = source;
         var allQuestions = data.questions;
@@ -145,6 +166,8 @@ $(document).ready(function () {
             var item = allQuestions[key];
             questions.push(item);
         }
+
+        shuffleQuizData(questions);
 
         $('#totalQuestions').text('Questions: ' + questions.length);
         $('#gameState').text('State: INITIALIZED');
@@ -232,144 +255,179 @@ $(document).ready(function () {
         updateZoomTransform();
     }
 
-    $('#closeZoom').off('click').click(function () {
-        $('#zoomModal').addClass('hidden');
-        setTimeout(resetZoom, 400);
-    });
-
-    $('#zoomModal').off('click').click(function (e) {
-        if (e.target === this || $(e.target).hasClass('zoom-wrapper') || $(e.target).closest('.zoom-modal-content').length === 0 && e.target.id !== 'zoomImage' && !$(e.target).closest('.zoom-controls').length && e.target.id !== 'closeZoom') {
+    window.bindQuizEvents = function () {
+        $('#closeZoom').off('click').click(function () {
             $('#zoomModal').addClass('hidden');
             setTimeout(resetZoom, 400);
+        });
+
+        $('#zoomModal').off('click').click(function (e) {
+            if (e.target === this || $(e.target).hasClass('zoom-wrapper') || $(e.target).closest('.zoom-modal-content').length === 0 && e.target.id !== 'zoomImage' && !$(e.target).closest('.zoom-controls').length && e.target.id !== 'closeZoom') {
+                $('#zoomModal').addClass('hidden');
+                setTimeout(resetZoom, 400);
+            }
+        });
+
+        $(document).off('keydown.zoommodal').on('keydown.zoommodal', function (e) {
+            if (e.key === 'Escape') {
+                $('#zoomModal').addClass('hidden');
+                setTimeout(resetZoom, 400);
+            }
+        });
+
+        $('#zoomInBtn').off('click').click(function (e) {
+            e.stopPropagation();
+            currentZoom = Math.min(currentZoom + 0.5, 5);
+            updateZoomTransform();
+        });
+
+        $('#zoomOutBtn').off('click').click(function (e) {
+            e.stopPropagation();
+            currentZoom = Math.max(currentZoom - 0.5, 0.5);
+            updateZoomTransform();
+        });
+
+        $('#zoomResetBtn').off('click').click(function (e) {
+            e.stopPropagation();
+            resetZoom();
+        });
+
+        $('#zoomImage').off('wheel').on('wheel', function (e) {
+            e.preventDefault();
+            if (e.originalEvent.deltaY < 0) {
+                currentZoom = Math.min(currentZoom + 0.2, 5);
+            } else {
+                currentZoom = Math.max(currentZoom - 0.2, 0.5);
+            }
+            updateZoomTransform();
+        });
+
+        $('#zoomImage').off('mousedown touchstart').on('mousedown touchstart', function (e) {
+            e.preventDefault();
+            isDragging = true;
+            var clientX = e.type === 'touchstart' ? e.originalEvent.touches[0].clientX : e.clientX;
+            var clientY = e.type === 'touchstart' ? e.originalEvent.touches[0].clientY : e.clientY;
+
+            startX = clientX - translateX;
+            startY = clientY - translateY;
+        });
+
+        $(window).off('mousemove touchmove').on('mousemove touchmove', function (e) {
+            if (!isDragging) return;
+            var clientX = e.type === 'touchmove' ? e.originalEvent.touches[0].clientX : e.clientX;
+            var clientY = e.type === 'touchmove' ? e.originalEvent.touches[0].clientY : e.clientY;
+
+            translateX = clientX - startX;
+            translateY = clientY - startY;
+            updateZoomTransform();
+        });
+
+        $(window).off('mouseup touchend').on('mouseup touchend', function () {
+            isDragging = false;
+        });
+
+        var quizDataForSave = null;
+
+        $('#btn-save-quiz').off('click').click(function () {
+            var quizId = window.currentQuizId;
+            var quizData = window.quizData;
+
+            if (!quizData) {
+                showToast('Aucun quiz chargé', 'error');
+                return;
+            }
+
+            var filename = 'quiz-backup-' + new Date().getTime() + '.json';
+            if (quizData.meta && quizData.meta.title) {
+                filename = quizData.meta.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.json';
+            }
+
+            var dataStr = JSON.stringify(quizData, null, 2);
+            var dataBlob = new Blob([dataStr], { type: 'application/json' });
+            var url = URL.createObjectURL(dataBlob);
+            var $link = $('<a>', {
+                href: url,
+                download: filename
+            }).appendTo('body');
+            $link[0].click();
+            $link.remove();
+            URL.revokeObjectURL(url);
+            showToast('Quiz téléchargé: ' + filename, 'success');
+        });
+
+        $('#btn-theme').off('click').click(function () {
+            toggleTheme();
+        });
+
+        $('#theme-checkbox').on('change', function () {
+            toggleTheme();
+        });
+
+        function toggleTheme() {
+            if ($('body').hasClass("dark")) {
+                $('body').attr('class', '');
+                $('#theme-checkbox').prop('checked', false);
+                localStorage.setItem('quiz-theme', 'light');
+            }
+            else {
+                $('body').attr('class', 'dark');
+                $('#theme-checkbox').prop('checked', true);
+                localStorage.setItem('quiz-theme', 'dark');
+            }
         }
-    });
 
-    $(document).off('keydown.zoommodal').on('keydown.zoommodal', function (e) {
-        if (e.key === 'Escape') {
-            $('#zoomModal').addClass('hidden');
-            setTimeout(resetZoom, 400);
+        var savedTheme = localStorage.getItem('quiz-theme');
+        if (savedTheme === 'dark') {
+            $('body').addClass('dark');
+            $('#theme-checkbox').prop('checked', true);
         }
-    });
 
-    $('#zoomInBtn').off('click').click(function (e) {
-        e.stopPropagation();
-        currentZoom = Math.min(currentZoom + 0.5, 5);
-        updateZoomTransform();
-    });
+        $('#btn-settings').off('click').click(function () {
+            $('#settingsModal').removeClass('hidden');
+        });
 
-    $('#zoomOutBtn').off('click').click(function (e) {
-        e.stopPropagation();
-        currentZoom = Math.max(currentZoom - 0.5, 0.5);
-        updateZoomTransform();
-    });
+        $('#closeSettings, #saveSettingsBtn').off('click').click(function () {
+            $('#settingsModal').addClass('hidden');
+        });
 
-    $('#zoomResetBtn').off('click').click(function (e) {
-        e.stopPropagation();
-        resetZoom();
-    });
+        $(window).off('click.settings').on('click.settings', function (event) {
+            if (event.target.id === 'settingsModal') {
+                $('#settingsModal').addClass('hidden');
+            }
+        });
 
-    $('#zoomImage').off('wheel').on('wheel', function (e) {
-        e.preventDefault();
-        if (e.originalEvent.deltaY < 0) {
-            currentZoom = Math.min(currentZoom + 0.2, 5);
-        } else {
-            currentZoom = Math.max(currentZoom - 0.2, 0.5);
-        }
-        updateZoomTransform();
-    });
+        $('#btn-import-quiz').off('click').click(function () {
+            $('#quiz-file-input').click();
+        });
 
-    $('#zoomImage').off('mousedown touchstart').on('mousedown touchstart', function (e) {
-        e.preventDefault();
-        isDragging = true;
-        var clientX = e.type === 'touchstart' ? e.originalEvent.touches[0].clientX : e.clientX;
-        var clientY = e.type === 'touchstart' ? e.originalEvent.touches[0].clientY : e.clientY;
-
-        startX = clientX - translateX;
-        startY = clientY - translateY;
-    });
-
-    $(window).off('mousemove touchmove').on('mousemove touchmove', function (e) {
-        if (!isDragging) return;
-        var clientX = e.type === 'touchmove' ? e.originalEvent.touches[0].clientX : e.clientX;
-        var clientY = e.type === 'touchmove' ? e.originalEvent.touches[0].clientY : e.clientY;
-
-        translateX = clientX - startX;
-        translateY = clientY - startY;
-        updateZoomTransform();
-    });
-
-    $(window).off('mouseup touchend').on('mouseup touchend', function () {
-        isDragging = false;
-    });
-
-    var quizDataForSave = null;
-
-    $('#btn-save-quiz').off('click').click(function () {
-        var quizId = window.currentQuizId;
-        var quizData = window.quizData;
-        
-        if (!quizData) {
-            showToast('Aucun quiz chargé', 'error');
-            return;
-        }
-        
-        var filename = 'quiz-backup-' + new Date().getTime() + '.json';
-        if (quizData.meta && quizData.meta.title) {
-            filename = quizData.meta.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.json';
-        }
-        
-        var dataStr = JSON.stringify(quizData, null, 2);
-        var dataBlob = new Blob([dataStr], { type: 'application/json' });
-        var url = URL.createObjectURL(dataBlob);
-        var $link = $('<a>', {
-            href: url,
-            download: filename
-        }).appendTo('body');
-        $link[0].click();
-        $link.remove();
-        URL.revokeObjectURL(url);
-        showToast('Quiz téléchargé: ' + filename, 'success');
-    });
-
-    $('#btn-theme').off('click').click(function () {
-        if ($('body').hasClass("dark")) {
-            $('body').attr('class', '')
-        }
-        else {
-            $('body').attr('class', 'dark')
-        }
-    });
-
-    $('#btn-import-quiz').off('click').click(function () {
-        $('#quiz-file-input').click();
-    });
-
-    $('#quiz-file-input').off('change').on('change', function (e) {
-        var file = e.target.files[0];
-        if (file) {
-            var reader = new FileReader();
-            reader.onload = function (event) {
-                try {
-                    var importedData = JSON.parse(event.target.result);
-                    if (importedData.questions && importedData.meta) {
-                        localStorage.setItem('importedQuizData', JSON.stringify(importedData));
-                        showToast('Quiz Importé ! Actualise pour appliquer.', 'success');
-                    } else {
-                        showToast('Format de quizz invalide.', 'error');
+        $('#quiz-file-input').off('change').on('change', function (e) {
+            var file = e.target.files[0];
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function (event) {
+                    try {
+                        var importedData = JSON.parse(event.target.result);
+                        if (importedData.questions && importedData.meta) {
+                            localStorage.setItem('importedQuizData', JSON.stringify(importedData));
+                            showToast('Quiz Importé ! Actualise pour appliquer.', 'success');
+                        } else {
+                            showToast('Format de quizz invalide.', 'error');
+                        }
+                    } catch (err) {
+                        showToast('Erreur lors de la lecture du fichier.', 'error');
                     }
-                } catch (err) {
-                    showToast('Erreur lors de la lecture du fichier.', 'error');
-                }
-            };
-            reader.readAsText(file);
-        }
-        this.value = '';
-    });
+                };
+                reader.readAsText(file);
+            }
+            this.value = '';
+        });
 
-    $('#btn-reset-quiz').off('click').click(function () {
-        localStorage.removeItem('importedQuizData');
-        showToast('Les données ont étées supprimées avec succès !', 'success');
-    });
+        $('#btn-reset-quiz').off('click').click(function () {
+            localStorage.removeItem('importedQuizData');
+            showToast('Les données ont étées supprimées avec succès !', 'success');
+        });
+    };
+    window.bindQuizEvents();
 });
 
 function saveProgress() {
@@ -844,7 +902,7 @@ function showFinalResults() {
             initializeQuizFromData(window.quizData);
         }
     });
-    
+
     $('#btn-skip').off('click');
     $('#btn-skip').click(function () {
         var currentQuizId = window.currentQuizId || "default";
@@ -870,12 +928,12 @@ var easter_egg = new Konami(function () {
     });
 });
 
-$(document).ready(function() {
+$(document).ready(function () {
     if (!$('.debug-toggle-btn').length) {
         $('<button class="debug-toggle-btn">🔧 Debug</button>').appendTo('body');
     }
-    
-    $(document).on('click', '.debug-toggle-btn', function() {
+
+    $(document).on('click', '.debug-toggle-btn', function () {
         var $debugContainer = $('.debug-container');
         if ($debugContainer.is(':visible')) {
             $debugContainer.hide();
@@ -918,6 +976,8 @@ function initializeQuizFromData(quizData) {
         var item = allQuestions[key];
         questions.push(item);
     }
+
+    shuffleQuizData(questions);
 
     console.log('Quiz initialisé avec ' + questions.length + ' questions');
 
@@ -1022,7 +1082,7 @@ function closeCreateQuizModal() {
 function addQuestion() {
     var questionCount = $('#questionsContainer .question-item').length + 1;
     var questionId = 'q-' + questionCount;
-    
+
     var questionHTML = '<div class="question-item" data-question-id="' + questionId + '">' +
         '<div class="question-number">Question ' + questionCount + '</div>' +
         '<div class="question-input-group">' +
@@ -1054,12 +1114,12 @@ function addQuestion() {
         '</div>' +
         '<button type="button" class="btn-remove-question" onclick="$(this).closest(\'.question-item\').remove(); updateQuestionNumbers();">Supprimer</button>' +
         '</div>';
-    
+
     $('#questionsContainer').append(questionHTML);
 }
 
 function updateQuestionNumbers() {
-    $('#questionsContainer .question-item').each(function(index) {
+    $('#questionsContainer .question-item').each(function (index) {
         $(this).find('.question-number').text('Question ' + (index + 1));
     });
 }
@@ -1071,33 +1131,33 @@ function saveQuizToLocalStorage() {
     var difficulty = parseInt($('#quizDifficulty').val());
     var coverImage = $('#quizCoverImage').val().trim();
     var tagsInput = $('#quizTags').val().trim();
-    var tags = tagsInput ? tagsInput.split(',').map(function(tag) { return tag.trim(); }) : [];
-    
+    var tags = tagsInput ? tagsInput.split(',').map(function (tag) { return tag.trim(); }) : [];
+
     if (!title || !description || !author) {
         showToast('Veuillez remplir tous les champs requis', 'error');
         return;
     }
-    
+
     var questionsArray = {};
     var questionNumber = 1;
     var valid = true;
-    
-    $('#questionsContainer .question-item').each(function() {
+
+    $('#questionsContainer .question-item').each(function () {
         var $item = $(this);
         var questionId = $item.attr('data-question-id');
         var questionText = $item.find('.question-text').val().trim();
-        
+
         if (!questionText) {
             showToast('Toutes les questions doivent avoir un énoncé', 'error');
             valid = false;
             return false;
         }
-        
+
         var answers = [];
         var correctAnswerIndex = 0;
         var hasSelected = false;
-        
-        $item.find('.answer-option').each(function(index) {
+
+        $item.find('.answer-option').each(function (index) {
             var answerText = $(this).find('.answer-text').val().trim();
             if (answerText) {
                 answers.push(answerText);
@@ -1108,19 +1168,19 @@ function saveQuizToLocalStorage() {
                 }
             }
         });
-        
+
         if (answers.length < 2) {
             showToast('Chaque question doit avoir au moins 2 réponses', 'error');
             valid = false;
             return false;
         }
-        
+
         if (!hasSelected) {
             showToast('Sélectionnez une bonne réponse pour chaque question', 'error');
             valid = false;
             return false;
         }
-        
+
         var key = (questionNumber < 10 ? '00' : '0') + questionNumber;
         questionsArray[key] = {
             question: questionText,
@@ -1131,11 +1191,11 @@ function saveQuizToLocalStorage() {
         };
         questionNumber++;
     });
-    
+
     if (!valid || Object.keys(questionsArray).length === 0) {
         return;
     }
-    
+
     var now = Math.floor(Date.now() / 1000);
     var quizData = {
         meta: {
@@ -1150,17 +1210,17 @@ function saveQuizToLocalStorage() {
         },
         questions: questionsArray
     };
-    
+
     var quizId = 'custom_' + now;
     localStorage.setItem('customQuiz_' + quizId, JSON.stringify(quizData));
-    
+
     var customQuizzes = JSON.parse(localStorage.getItem('customQuizzes')) || [];
     customQuizzes.push(quizId);
     localStorage.setItem('customQuizzes', JSON.stringify(customQuizzes));
-    
+
     showToast('Quiz créé avec succès!', 'success');
     closeCreateQuizModal();
-    setTimeout(function() {
+    setTimeout(function () {
         if (typeof loadAllQuizzes === 'function') {
             loadAllQuizzes();
         }
@@ -1168,50 +1228,50 @@ function saveQuizToLocalStorage() {
 }
 
 function getNextQuizAndLoad(currentQuizId) {
-    $.getJSON('./quiz/manifest.json', function(manifest) {
+    $.getJSON('./quiz/manifest.json', function (manifest) {
         var allQuizzes = [...(manifest.quizzes || [])];
         var customQuizzes = JSON.parse(localStorage.getItem('customQuizzes')) || [];
         allQuizzes = allQuizzes.concat(customQuizzes);
-        
+
         if (allQuizzes.length === 0) {
             showToast('Aucun quiz suivant disponible', 'warn');
             return;
         }
-        
+
         var currentIndex = allQuizzes.indexOf(currentQuizId);
         var nextIndex = currentIndex + 1;
-        
+
         if (nextIndex >= allQuizzes.length) {
             nextIndex = 0;
         }
-        
+
         var nextQuizId = allQuizzes[nextIndex];
         if (typeof window.loadQuiz === 'function') {
             window.loadQuiz(nextQuizId);
         } else {
             showToast('Impossible de charger le quiz suivant', 'error');
         }
-    }).fail(function() {
+    }).fail(function () {
         showToast('Erreur lors du chargement de la liste des quizzes', 'error');
     });
 }
 
-$(document).ready(function() {
+$(document).ready(function () {
     $('#quiz-creator-button').click(openCreateQuizModal);
     $('#closeCreateQuiz').click(closeCreateQuizModal);
     $('#cancelQuizBtn').click(closeCreateQuizModal);
-    
-    $('#addQuestionBtn').click(function(e) {
+
+    $('#addQuestionBtn').click(function (e) {
         e.preventDefault();
         addQuestion();
     });
-    
-    $('#quizCreatorForm').submit(function(e) {
+
+    $('#quizCreatorForm').submit(function (e) {
         e.preventDefault();
         saveQuizToLocalStorage();
     });
-    
-    $(document).on('click', '.btn-export-json', function(e) {
+
+    $(document).on('click', '.btn-export-json', function (e) {
         e.stopPropagation();
         var quizId = $(this).attr('data-quiz-id');
         exportQuizToJSON(quizId);
@@ -1224,7 +1284,7 @@ function exportQuizToJSON(quizId) {
         showToast('Quiz not found', 'error');
         return;
     }
-    
+
     try {
         var quiz = JSON.parse(quizData);
         var jsonString = JSON.stringify(quiz, null, 2);

@@ -119,15 +119,13 @@ async function loadQuiz(quizId) {
   try {
     const templateHtml = await $.get('./quiz-template.html');
     
-    const $landing = $('#landing-page');
-    if ($landing.length && !savedLandingPage) {
-      savedLandingPage = $landing.clone(true, true);
+    if (!savedLandingPage) {
+      savedLandingPage = $('body').children().not('script').clone(true, true);
     }
-    if ($landing.length) {
-      $landing.remove();
+    $('body').empty().append(templateHtml);
+    if (typeof window.bindQuizEvents === 'function') {
+      window.bindQuizEvents();
     }
-
-    $('body').html(templateHtml);
 
     const $backButton = $('<button>', {
       class: 'btn-back',
@@ -163,6 +161,9 @@ async function loadQuiz(quizId) {
 function goBackToLanding() {
   if (savedLandingPage) {
     $('body').empty().append(savedLandingPage.clone(true, true));
+    if (typeof loadAllQuizzes === 'function') {
+      loadAllQuizzes();
+    }
   } else {
     location.href = './';
   }

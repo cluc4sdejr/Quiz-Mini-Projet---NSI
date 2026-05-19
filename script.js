@@ -1266,6 +1266,11 @@ $(document).ready(function () {
         addQuestion();
     });
 
+    $('#popupNext').click(function (e) {
+        e.preventDefault();
+        $('.ad_container').hide();
+    });
+
     $('#quizCreatorForm').submit(function (e) {
         e.preventDefault();
         saveQuizToLocalStorage();

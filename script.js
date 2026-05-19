@@ -1268,7 +1268,8 @@ $(document).ready(function () {
 
     $('#popupNext').click(function (e) {
         e.preventDefault();
-        $('.ad_container').hide();
+        $('.declaredonc').hide();
+        $('.formcringe').show();
     });
 
     $('#quizCreatorForm').submit(function (e) {

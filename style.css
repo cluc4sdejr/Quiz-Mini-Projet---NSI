@@ -2495,3 +2495,7 @@ input:checked+.slider:before {
     border-radius: 40px;
     gap: 15px;
 }
+
+.formcringe {
+    display: none;
+}

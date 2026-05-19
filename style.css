@@ -2497,6 +2497,5 @@ input:checked+.slider:before {
 }
 
 .formcringe {
-    display: none !important;
-    visibility: hidden;
+    display: none;
 }

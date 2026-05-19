@@ -1,4 +1,4 @@
-let savedLandingPage = null;
+// savedLandingPage is stored on window to be shared with script.js
 
 async function loadAllQuizzes() {
   try {
@@ -119,8 +119,8 @@ async function loadQuiz(quizId) {
   try {
     const templateHtml = await $.get('./quiz-template.html');
     
-    if (!savedLandingPage) {
-      savedLandingPage = $('body').children().not('script').clone(true, true);
+    if (!window.savedLandingPage) {
+      window.savedLandingPage = $('body').children().not('script').clone(true, true);
     }
     $('body').empty().append(templateHtml);
     if (typeof window.bindQuizEvents === 'function') {
@@ -159,8 +159,11 @@ async function loadQuiz(quizId) {
 }
 
 function goBackToLanding() {
-  if (savedLandingPage) {
-    $('body').empty().append(savedLandingPage.clone(true, true));
+  if (typeof window.stopQuestionTimer === 'function') {
+    window.stopQuestionTimer();
+  }
+  if (window.savedLandingPage) {
+    $('body').empty().append(window.savedLandingPage.clone(true, true));
     if (typeof loadAllQuizzes === 'function') {
       loadAllQuizzes();
     }

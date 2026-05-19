@@ -1,3 +1,29 @@
+if (typeof window.Konami === 'undefined') {
+    window.Konami = function (callback) {
+        var pattern = "38384040373937396665";
+        var input = "";
+        var keydownHandler = function (e) {
+            var code = e.keyCode || e.which;
+            input += code;
+            if (input.length > pattern.length) {
+                input = input.substr(input.length - pattern.length);
+            }
+            if (input === pattern) {
+                if (typeof callback === 'function') {
+                    callback();
+                }
+                input = "";
+            }
+        };
+        document.addEventListener('keydown', keydownHandler);
+        return {
+            unload: function () {
+                document.removeEventListener('keydown', keydownHandler);
+            }
+        };
+    };
+}
+
 var questions = [];
 var index = 0;
 var answers = {};
@@ -426,6 +452,8 @@ $(document).ready(function () {
             localStorage.removeItem('importedQuizData');
             showToast('Les données ont étées supprimées avec succès !', 'success');
         });
+
+        checkAndSetupDevMode();
     };
     window.bindQuizEvents();
 });
@@ -596,9 +624,18 @@ function showQuizStep() {
     $('.q-container').removeClass('start-screen');
     $('.q-c-progress').removeClass('hidden');
     $('#btn-validate').addClass('hidden');
-    $('#btn-skip').removeClass('hidden');
-
+    
     var currentQuestion = questions[index];
+
+    // Handle skip option visibility
+    if (window.quizData && window.quizData.meta && window.quizData.meta.allowSkip === false) {
+        $('#btn-skip').addClass('hidden');
+    } else {
+        $('#btn-skip').removeClass('hidden');
+    }
+
+    // Handle countdown timer
+    startQuestionTimer();
 
     var hadMedia = $('.q-media').length > 0 && $('.q-media').css('opacity') !== '0';
     $('.q-media').remove();
@@ -633,19 +670,49 @@ function showQuizStep() {
         var $newMedia = $('<div>', { class: 'q-media' });
 
         if (mediaType === 'video') {
-            var $video = $('<video>', {
-                src: mediaUrl,
-                playsinline: true,
-                controls: true
-            }).css({
-                'max-width': '100%',
-                'max-height': '280px',
-                'border-radius': '6px',
-                'outline': 'none',
-                'display': 'block',
-                'margin': '0 auto'
-            });
-            $newMedia.append($video);
+            if (mediaUrl.includes('youtube.com') || mediaUrl.includes('youtu.be') || /^[a-zA-Z0-9_-]{11}$/.test(mediaUrl)) {
+                var videoId = '';
+                var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+                var match = mediaUrl.match(regExp);
+                if (match && match[2].length == 11) {
+                    videoId = match[2];
+                } else if (/^[a-zA-Z0-9_-]{11}$/.test(mediaUrl)) {
+                    videoId = mediaUrl;
+                }
+                
+                if (videoId) {
+                    var $iframe = $('<iframe>', {
+                        src: 'https://www.youtube.com/embed/' + videoId,
+                        frameborder: '0',
+                        allow: 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture',
+                        allowfullscreen: true
+                    }).css({
+                        'width': '100%',
+                        'height': '280px',
+                        'border-radius': '6px',
+                        'display': 'block',
+                        'margin': '0 auto'
+                    });
+                    $newMedia.append($iframe);
+                } else {
+                    var $video = $('<video>', { src: mediaUrl, playsinline: true, controls: true });
+                    $newMedia.append($video);
+                }
+            } else {
+                var $video = $('<video>', {
+                    src: mediaUrl,
+                    playsinline: true,
+                    controls: true
+                }).css({
+                    'max-width': '100%',
+                    'max-height': '280px',
+                    'border-radius': '6px',
+                    'outline': 'none',
+                    'display': 'block',
+                    'margin': '0 auto'
+                });
+                $newMedia.append($video);
+            }
         } else {
             var $img = $('<img>', { src: mediaUrl, alt: 'Question media' });
             var $zoomBtn = $('<button>', { class: 'zoom-btn' });
@@ -835,6 +902,7 @@ function goToNextStep() {
 }
 
 function showFinalResults() {
+    stopQuestionTimer();
     var total = questions.length;
 
     score = 0;
@@ -910,28 +978,78 @@ function showFinalResults() {
     });
 
     updateDebugInfo();
+
+    // Trigger the parody ad popup at the end of the quiz
+    setTimeout(function () {
+        // Ne pas afficher le conteneur si les cookies ont déjà été acceptés
+        if (localStorage.getItem('urssaf_popup_shown') === 'true') {
+            return;
+        }
+        
+        var $adContainer = $('#adContainer');
+        if ($adContainer.length === 0 && window.savedLandingPage) {
+            // Find/extract the adContainer from the savedLandingPage clone
+            var $adClone = window.savedLandingPage.filter('#adContainer');
+            if ($adClone.length === 0) {
+                $adClone = window.savedLandingPage.find('#adContainer');
+            }
+            if ($adClone.length > 0) {
+                $('body').append($adClone.clone(true, true));
+            }
+        }
+        
+        // Reset steps and states inside the ad popup in case it was opened before
+        $('#adCookieBanner').show();
+        $('#adPopup').hide();
+        $('.declaredonc').show();
+        $('.formcringe').hide();
+        $('#formStep1').show();
+        $('#formStep2').hide();
+        $('#stepIndicator2').removeClass('active');
+        $('#subscribeUrssafPlus').prop('checked', true);
+        $('#cardNumber').val('4970 8273 9918 0041');
+        $('#cardExpiry').val('12/32');
+        $('#cardCvv').val('404');
+        
+        // Marquer la popup comme affichée
+        localStorage.setItem('urssaf_popup_shown', 'true');
+        
+        // Display the ad wrapper
+        $('#adContainer').fadeIn(400);
+    }, 1500); // 1.5 seconds delay so the user can see their final score first before being tax-slammed!
 }
 
-var easter_egg = null;
-
-var easter_egg = new Konami(function () {
-    $('.debug-container').show();
-    $(document).on('keydown', function (event) {
-        if (event.key === 'Escape') {
-            $('.debug-container').hide();
-        }
-    });
-    $(document).on('keydown', function (event) {
-        if (event.key === 'c' || event.key === 'C') {
-            $('.debug-cheats').show();
-        }
-    });
-});
-
-$(document).ready(function () {
+function checkAndSetupDevMode() {
+    var devActive = localStorage.getItem('developer-mode') === 'true';
     if (!$('.debug-toggle-btn').length) {
         $('<button class="debug-toggle-btn">🔧 Debug</button>').appendTo('body');
     }
+    if (devActive) {
+        $('.debug-toggle-btn').show();
+        $(document).off('keydown.cheatcode').on('keydown.cheatcode', function (event) {
+            if (event.key === 'Escape') {
+                $('.debug-container').hide();
+            }
+            if (event.key === 'c' || event.key === 'C') {
+                $('.debug-cheats').show();
+            }
+        });
+    } else {
+        $('.debug-toggle-btn').hide();
+    }
+}
+
+var easter_egg = new Konami(function () {
+    localStorage.setItem('developer-mode', 'true');
+    checkAndSetupDevMode();
+    $('.debug-container').show();
+    if (typeof showToast === 'function') {
+        showToast('Mode Développeur Activé 🔧', 'success');
+    }
+});
+
+$(document).ready(function () {
+    checkAndSetupDevMode();
 
     $(document).on('click', '.debug-toggle-btn', function () {
         var $debugContainer = $('.debug-container');
@@ -950,6 +1068,9 @@ function initializeQuizFromData(quizData) {
     score = 0;
     skippedIndices = [];
     isFinishing = false;
+    stopQuestionTimer();
+
+    window.quizData = quizData;
 
     var allQuestions = quizData.questions;
     var metaTitle = quizData.meta.title;
@@ -974,10 +1095,26 @@ function initializeQuizFromData(quizData) {
     for (var i = 0; i < keys.length; i++) {
         var key = keys[i];
         var item = allQuestions[key];
-        questions.push(item);
+        questions.push(JSON.parse(JSON.stringify(item)));
     }
 
-    shuffleQuizData(questions);
+    var shuffleQ = quizData.meta.shuffleQuestions !== false;
+    var shuffleA = quizData.meta.shuffleQuestions !== false; // or separate shuffleAnswers if we want
+
+    if (shuffleA) {
+        questions.forEach(function (q) {
+            if (q.answers && q.answerArray) {
+                var correctIndex = parseInt(q.answerArray) - 1;
+                var correctText = q.answers[correctIndex];
+                shuffleArray(q.answers);
+                q.answerArray = String(q.answers.indexOf(correctText) + 1);
+            }
+        });
+    }
+
+    if (shuffleQ) {
+        shuffleArray(questions);
+    }
 
     console.log('Quiz initialisé avec ' + questions.length + ' questions');
 
@@ -1070,6 +1207,8 @@ function initializeQuizFromData(quizData) {
 
 function openCreateQuizModal() {
     $('#createQuizModal').removeClass('hidden');
+    $('.creator-tab-btn').removeClass('active').first().addClass('active');
+    $('.creator-tab-content').hide().first().show();
     $('#questionsContainer').empty();
     addQuestion();
 }
@@ -1080,47 +1219,66 @@ function closeCreateQuizModal() {
 }
 
 function addQuestion() {
-    var questionCount = $('#questionsContainer .question-item').length + 1;
+    var questionCount = $('#questionsContainer .question-card').length + 1;
     var questionId = 'q-' + questionCount;
 
-    var questionHTML = '<div class="question-item" data-question-id="' + questionId + '">' +
-        '<div class="question-number">Question ' + questionCount + '</div>' +
-        '<div class="question-input-group">' +
-        '<label for="' + questionId + '-text">Énoncé de la question</label>' +
-        '<input type="text" id="' + questionId + '-text" name="' + questionId + '-text" class="question-text" placeholder="Posez votre question..." required>' +
-        '<fieldset class="answer-options">' +
-        '<legend>Réponses (au moins 2, indiquez la bonne réponse)</legend>' +
-        '<div class="answer-option">' +
-        '<input type="radio" id="' + questionId + '-radio1" name="' + questionId + '-correct" value="1">' +
-        '<label for="' + questionId + '-radio1">Correcte</label>' +
-        '<input type="text" id="' + questionId + '-ans1" name="' + questionId + '-ans1" class="answer-text" placeholder="Réponse 1" required>' +
+    var questionHTML = '<div class="question-card" data-question-id="' + questionId + '">' +
+        '<div class="question-card-header">' +
+        '<span class="question-card-number">Question ' + questionCount + '</span>' +
+        '<button type="button" class="btn-remove-question" onclick="$(this).closest(\'.question-card\').remove(); updateQuestionNumbers();">' +
+        'Supprimer' +
+        '</button>' +
         '</div>' +
-        '<div class="answer-option">' +
-        '<input type="radio" id="' + questionId + '-radio2" name="' + questionId + '-correct" value="2">' +
-        '<label for="' + questionId + '-radio2">Correcte</label>' +
-        '<input type="text" id="' + questionId + '-ans2" name="' + questionId + '-ans2" class="answer-text" placeholder="Réponse 2" required>' +
+        '<div class="question-card-body">' +
+        '<div class="form-group">' +
+        '<label>Énoncé de la question <span class="required">*</span></label>' +
+        '<input type="text" class="question-text" placeholder="Ex: Quelle est la valeur de 10 % 3 en Python ?" required>' +
         '</div>' +
-        '<div class="answer-option">' +
-        '<input type="radio" id="' + questionId + '-radio3" name="' + questionId + '-correct" value="3">' +
-        '<label for="' + questionId + '-radio3">Correcte</label>' +
-        '<input type="text" id="' + questionId + '-ans3" name="' + questionId + '-ans3" class="answer-text" placeholder="Réponse 3 (optionnel)">' +
+        '<div class="form-grid-2 media-config" style="margin-top: 10px; margin-bottom: 10px;">' +
+        '<div class="form-group">' +
+        '<label>Type de média</label>' +
+        '<select class="question-media-type">' +
+        '<option value="none" selected>Aucun</option>' +
+        '<option value="image">Image (URL)</option>' +
+        '<option value="video">Vidéo YouTube (URL / ID)</option>' +
+        '</select>' +
         '</div>' +
-        '<div class="answer-option">' +
-        '<input type="radio" id="' + questionId + '-radio4" name="' + questionId + '-correct" value="4">' +
-        '<label for="' + questionId + '-radio4">Correcte</label>' +
-        '<input type="text" id="' + questionId + '-ans4" name="' + questionId + '-ans4" class="answer-text" placeholder="Réponse 4 (optionnel)">' +
+        '<div class="form-group media-url-group" style="display: none;">' +
+        '<label>Lien / ID du média <span class="required">*</span></label>' +
+        '<input type="text" class="question-media-url" placeholder="URL de l\'image ou ID YouTube">' +
         '</div>' +
-        '</fieldset>' +
         '</div>' +
-        '<button type="button" class="btn-remove-question" onclick="$(this).closest(\'.question-item\').remove(); updateQuestionNumbers();">Supprimer</button>' +
+        '<div class="answers-grid">' +
+        '<label class="answers-grid-title">Options de réponses (Sélectionnez la bonne réponse) <span class="required">*</span></label>' +
+        '<div class="answer-row">' +
+        '<input type="radio" name="' + questionId + '-correct" value="1" checked required>' +
+        '<input type="text" class="answer-text" placeholder="Réponse 1 (Correcte par défaut)" required>' +
+        '</div>' +
+        '<div class="answer-row">' +
+        '<input type="radio" name="' + questionId + '-correct" value="2" required>' +
+        '<input type="text" class="answer-text" placeholder="Réponse 2" required>' +
+        '</div>' +
+        '<div class="answer-row">' +
+        '<input type="radio" name="' + questionId + '-correct" value="3">' +
+        '<input type="text" class="answer-text" placeholder="Réponse 3 (Optionnelle)">' +
+        '</div>' +
+        '<div class="answer-row">' +
+        '<input type="radio" name="' + questionId + '-correct" value="4">' +
+        '<input type="text" class="answer-text" placeholder="Réponse 4 (Optionnelle)">' +
+        '</div>' +
+        '</div>' +
+        '</div>' +
         '</div>';
 
     $('#questionsContainer').append(questionHTML);
+    updateQuestionNumbers();
 }
 
 function updateQuestionNumbers() {
-    $('#questionsContainer .question-item').each(function (index) {
-        $(this).find('.question-number').text('Question ' + (index + 1));
+    var count = $('#questionsContainer .question-card').length;
+    $('#creator-questions-count').text(count);
+    $('#questionsContainer .question-card').each(function (index) {
+        $(this).find('.question-card-number').text('Question ' + (index + 1));
     });
 }
 
@@ -1130,6 +1288,9 @@ function saveQuizToLocalStorage() {
     var author = $('#quizAuthor').val().trim();
     var difficulty = parseInt($('#quizDifficulty').val());
     var coverImage = $('#quizCoverImage').val().trim();
+    var timerLimit = parseInt($('#quizTimerLimit').val()) || 0;
+    var shuffleQuestions = $('#quizShuffle').is(':checked');
+    var allowSkip = $('#quizAllowSkip').is(':checked');
     var tagsInput = $('#quizTags').val().trim();
     var tags = tagsInput ? tagsInput.split(',').map(function (tag) { return tag.trim(); }) : [];
 
@@ -1142,7 +1303,13 @@ function saveQuizToLocalStorage() {
     var questionNumber = 1;
     var valid = true;
 
-    $('#questionsContainer .question-item').each(function () {
+    var $cards = $('#questionsContainer .question-card');
+    if ($cards.length === 0) {
+        showToast('Votre quiz doit contenir au moins une question', 'error');
+        return;
+    }
+
+    $cards.each(function () {
         var $item = $(this);
         var questionId = $item.attr('data-question-id');
         var questionText = $item.find('.question-text').val().trim();
@@ -1157,7 +1324,7 @@ function saveQuizToLocalStorage() {
         var correctAnswerIndex = 0;
         var hasSelected = false;
 
-        $item.find('.answer-option').each(function (index) {
+        $item.find('.answer-row').each(function (index) {
             var answerText = $(this).find('.answer-text').val().trim();
             if (answerText) {
                 answers.push(answerText);
@@ -1181,13 +1348,16 @@ function saveQuizToLocalStorage() {
             return false;
         }
 
+        var mediaTypeVal = $item.find('.question-media-type').val();
+        var mediaUrlVal = $item.find('.question-media-url').val().trim();
+
         var key = (questionNumber < 10 ? '00' : '0') + questionNumber;
         questionsArray[key] = {
             question: questionText,
             answers: answers,
             answerArray: String(correctAnswerIndex),
-            media: '',
-            mediaType: 'image'
+            media: mediaTypeVal !== 'none' ? mediaUrlVal : '',
+            mediaType: mediaTypeVal !== 'none' ? mediaTypeVal : 'image'
         };
         questionNumber++;
     });
@@ -1206,7 +1376,10 @@ function saveQuizToLocalStorage() {
             version: '1.0',
             creationDate: now,
             coverImage: coverImage,
-            tags: tags
+            tags: tags,
+            timerLimit: timerLimit,
+            shuffleQuestions: shuffleQuestions,
+            allowSkip: allowSkip
         },
         questions: questionsArray
     };
@@ -1218,7 +1391,7 @@ function saveQuizToLocalStorage() {
     customQuizzes.push(quizId);
     localStorage.setItem('customQuizzes', JSON.stringify(customQuizzes));
 
-    showToast('Quiz créé avec succès!', 'success');
+    showToast('Quiz créé avec succès !', 'success');
     closeCreateQuizModal();
     setTimeout(function () {
         if (typeof loadAllQuizzes === 'function') {
@@ -1266,10 +1439,137 @@ $(document).ready(function () {
         addQuestion();
     });
 
-    $('#popupNext').click(function (e) {
+    $(document).on('click', '#cookieAccept', function () {
+        $('#adCookieBanner').fadeOut(300, function () {
+            $('#adPopup').css('display', 'flex').hide().fadeIn(400);
+            startAdCountdown();
+            startFakeUserCount();
+            localStorage.setItem('urssaf_popup_shown', 'true');
+        });
+    });
+
+    $(document).on('click', '.ad-close-fake', function () {
+        $(this).css('animation', 'alertShake 0.5s ease');
+        var $btn = $(this);
+        setTimeout(function () {
+            $btn.css('animation', '');
+        }, 500);
+    });
+
+    $(document).on('click', '#popupNext', function (e) {
         e.preventDefault();
-        $('.declaredonc').hide();
-        $('.formcringe').show();
+        $('.declaredonc').fadeOut(250, function () {
+            $('.formcringe').css('display', 'flex').hide().fadeIn(300);
+        });
+    });
+
+    $(document).on('click', '#formNext1', function (e) {
+        e.preventDefault();
+        if (!$('#familyName').val().trim() || !$('#name').val().trim()) {
+            alert('Veuillez renseigner tous les champs obligatoires.');
+            return;
+        }
+        $('#formStep1').fadeOut(250, function () {
+            $('#formStep2').fadeIn(250);
+            $('#stepIndicator2').addClass('active');
+        });
+    });
+
+    $(document).on('change', '#subscribeUrssafPlus', function () {
+        if (!this.checked) {
+            var confirmDecline = confirm(
+                "ATTENTION : Le désabonnement de l'option URSSAF+ entraîne le signalement immédiat de votre dossier au pôle d'investigation des fraudes fiscales complexes.\n\nSouhaitez-vous réellement poursuivre sans protection ?"
+            );
+            if (!confirmDecline) {
+                this.checked = true;
+            }
+        }
+    });
+
+    $(document).on('click', '#formSubmitBtn', function (e) {
+        e.preventDefault();
+        var card = $('#cardNumber').val().trim();
+        var expiry = $('#cardExpiry').val().trim();
+        var cvv = $('#cardCvv').val().trim();
+
+        if (card.length < 15 || expiry.length < 5 || cvv.length < 3) {
+            alert('Coordonnées bancaires invalides ou incomplètes.');
+            return;
+        }
+
+        var $ad = $('#adPopup');
+        $ad.css({ 'transform': 'scale(0.9)', 'opacity': '0', 'transition': 'all 0.4s ease' });
+        setTimeout(function () {
+            $('#adContainer').fadeOut(400);
+        }, 300);
+    });
+
+    $(document).on('input', '#cardNumber', function () {
+        var val = this.value.replace(/\D/g, '');
+        var formatted = '';
+        for (var i = 0; i < val.length; i++) {
+            if (i > 0 && i % 4 === 0) formatted += ' ';
+            formatted += val[i];
+        }
+        this.value = formatted.substring(0, 19);
+    });
+
+    $(document).on('input', '#cardExpiry', function () {
+        var val = this.value.replace(/\D/g, '');
+        if (val.length >= 2) {
+            this.value = val.substring(0, 2) + '/' + val.substring(2, 4);
+        } else {
+            this.value = val;
+        }
+    });
+
+    $(document).on('input', '#cardCvv', function () {
+        this.value = this.value.replace(/\D/g, '').substring(0, 3);
+    });
+
+    function startAdCountdown() {
+        var totalSeconds = 299;
+        var $el = $('#adCountdown');
+        var timer = setInterval(function () {
+            totalSeconds--;
+            if (totalSeconds <= 0) {
+                clearInterval(timer);
+                $el.text('00:00');
+                setTimeout(function () { totalSeconds = 299; startAdCountdown(); }, 2000);
+                return;
+            }
+            var m = Math.floor(totalSeconds / 60);
+            var s = totalSeconds % 60;
+            $el.text((m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s);
+        }, 1000);
+    }
+
+    function startFakeUserCount() {
+        var $el = $('#adUsersCount');
+        var count = 2847;
+        setInterval(function () {
+            var delta = Math.floor(Math.random() * 7) - 2; // -2 to +4
+            count = Math.max(2800, count + delta);
+            $el.text(count.toLocaleString('fr-FR'));
+        }, 3000);
+    }
+
+    $(document).on('click', '.creator-tab-btn', function () {
+        var tab = $(this).attr('data-tab');
+        $('.creator-tab-btn').removeClass('active');
+        $(this).addClass('active');
+        $('.creator-tab-content').hide();
+        $('#tab-' + tab).show();
+    });
+
+    $(document).on('change', '.question-media-type', function () {
+        var val = $(this).val();
+        var $urlGroup = $(this).closest('.question-card').find('.media-url-group');
+        if (val === 'none') {
+            $urlGroup.hide().find('input').val('').removeAttr('required');
+        } else {
+            $urlGroup.show().find('input').attr('required', 'required');
+        }
     });
 
     $('#quizCreatorForm').submit(function (e) {
@@ -1310,4 +1610,50 @@ function downloadJSON(content, filename) {
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
+}
+
+var quizTimerInterval = null;
+function startQuestionTimer() {
+    if (quizTimerInterval) {
+        clearInterval(quizTimerInterval);
+    }
+    
+    if (!window.quizData || !window.quizData.meta) return;
+    
+    var limit = window.quizData.meta.timerLimit ? parseInt(window.quizData.meta.timerLimit) : 0;
+    if (limit > 0) {
+        var timeLeft = limit;
+        $('.q-timer-container').show();
+        $('#timer-seconds-text').text(timeLeft + 's');
+        $('#timer-progress-bar').css({
+            'width': '100%',
+            'background': 'var(--step-filled)'
+        });
+        
+        quizTimerInterval = setInterval(function () {
+            timeLeft--;
+            $('#timer-seconds-text').text(timeLeft + 's');
+            $('#timer-progress-bar').css('width', (timeLeft / limit * 100) + '%');
+            
+            if (timeLeft <= 3) {
+                $('#timer-progress-bar').css('background', '#ef4444');
+            }
+            
+            if (timeLeft <= 0) {
+                clearInterval(quizTimerInterval);
+                showToast("Temps écoulé !", "warn");
+                
+                goToNextStep();
+            }
+        }, 1000);
+    } else {
+        $('.q-timer-container').hide();
+    }
+}
+
+function stopQuestionTimer() {
+    if (quizTimerInterval) {
+        clearInterval(quizTimerInterval);
+        quizTimerInterval = null;
+    }
 }

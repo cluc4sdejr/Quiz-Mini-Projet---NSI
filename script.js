@@ -1260,6 +1260,7 @@ $(document).ready(function () {
     $('#quiz-creator-button').click(openCreateQuizModal);
     $('#closeCreateQuiz').click(closeCreateQuizModal);
     $('#cancelQuizBtn').click(closeCreateQuizModal);
+    $('.declaredonc').hide();
 
     $('#addQuestionBtn').click(function (e) {
         e.preventDefault();

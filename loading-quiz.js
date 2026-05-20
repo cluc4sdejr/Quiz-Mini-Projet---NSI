@@ -129,12 +129,6 @@ async function loadQuiz(quizId) {
     }
 
     if (quizData.isBadtime === true || quizData.isBadtime === "true") {
-      const $backButton = $('<button>', {
-        class: 'btn-back',
-        text: '← Retour à l\'accueil'
-      }).on('click', goBackToLanding);
-
-      $('body').prepend($backButton);
       $('#badtimeContainer').css('display', 'flex');
       $('#loader').addClass('hide');
 

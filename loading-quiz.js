@@ -123,7 +123,7 @@ async function loadQuiz(quizId) {
     if (!window.savedLandingPage) {
       window.savedLandingPage = $('body').children().not('script').clone(true, true);
     }
-    $('body').append(templateHtml);
+    $('body').empty().append(templateHtml);
     if (typeof window.bindQuizEvents === 'function') {
       window.bindQuizEvents();
     }

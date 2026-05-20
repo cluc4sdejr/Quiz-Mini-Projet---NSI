@@ -153,6 +153,7 @@ $(document).ready(function () {
         var metaCreationDate = data.meta.creationDate;
         var metaVersion = data.meta.version;
         var userAgent = navigator.userAgent;
+        var isFlowey = data.isFlowey;
         var keys = Object.keys(allQuestions);
 
         var timestampInMilliSeconds = metaCreationDate * 1000;

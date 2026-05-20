@@ -1,0 +1,14 @@
+{
+  "isFlowey": true,
+  "meta": {
+    "title": "Quiz Undertalesque",
+    "description": "C'est très dur genre vrm tu vas battre flowey?",
+    "author": "C moi wsh",
+    "difficulty": 4,
+    "version": "1.0",
+    "creationDate": 1775561532,
+    "coverImage": "assets/floweyback.png",
+    "tags": []
+  },
+  "questions": {}
+}

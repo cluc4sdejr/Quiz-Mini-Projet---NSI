@@ -116,6 +116,10 @@ $(document).ready(function () {
     var dataSource = 'original';
     var dataToLoad = null;
 
+    if (isFlowey != "true") {
+        $(".flowey_container").show();
+    }
+
     if (importedData) {
         try {
             dataToLoad = JSON.parse(importedData);
@@ -205,10 +209,6 @@ $(document).ready(function () {
         updateDebugInfo();
 
         var savedData = localStorage.getItem('quiz');
-
-        if (isFlowey != "true") {
-            $(".flowey_container").show();
-        }
 
         if (savedData != null) {
             var parsedData = JSON.parse(savedData);

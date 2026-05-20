@@ -2918,7 +2918,7 @@ input:checked+.slider:before {
     }
 }
 
-.flowey_container {
+.badtime_container {
     position: fixed;
     top: 0;
     left: 0;
@@ -2929,14 +2929,35 @@ input:checked+.slider:before {
     display: flex;
     justify-content: center;
     align-items: center;
-    animation: floweyContainerIn 0.5s ease-out;
+    animation: badtimeContainerIn 0.5s ease-out;
+    flex-direction: row;
+    gap: 30px;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
-@keyframes floweyContainerIn {
+.badtime_container > iframe {
+    border: none;
+}
+
+@keyframes badtimeContainerIn {
     0% {
         transform: scaleY(0);
     }
     100% {
         transform: scaleY(1);
     }
+}
+
+.closeBadtime {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    color: #ffffff;
+    border: none;
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease;
 }

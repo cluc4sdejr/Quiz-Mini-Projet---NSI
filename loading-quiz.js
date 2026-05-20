@@ -1,5 +1,3 @@
-// savedLandingPage is stored on window to be shared with script.js
-
 async function loadAllQuizzes() {
   try {
     const manifest = await $.getJSON('./quiz/manifest.json');
@@ -118,11 +116,34 @@ function getDifficultyLabel(difficulty) {
 
 async function loadQuiz(quizId) {
   try {
-    const templateHtml = await $.get('./quiz-template.html');
-    
     if (!window.savedLandingPage) {
       window.savedLandingPage = $('body').children().not('script').clone(true, true);
     }
+
+    let quizData;
+    if (quizId.startsWith('custom_')) {
+      quizData = JSON.parse(localStorage.getItem('customQuiz_' + quizId));
+      if (!quizData) throw new Error('Quiz non trouvé');
+    } else {
+      quizData = await $.getJSON(`./quiz/${quizId}.json`);
+    }
+
+    if (quizData.isBadtime === true || quizData.isBadtime === "true") {
+      const $backButton = $('<button>', {
+        class: 'btn-back',
+        text: '← Retour à l\'accueil'
+      }).on('click', goBackToLanding);
+
+      $('body').prepend($backButton);
+      $('#badtimeContainer').css('display', 'flex');
+      $('#loader').addClass('hide');
+
+      window.quizData = quizData;
+      window.currentQuizId = quizId;
+      return;
+    }
+
+    const templateHtml = await $.get('./quiz-template.html');
     $('body').empty().append(templateHtml);
     if (typeof window.bindQuizEvents === 'function') {
       window.bindQuizEvents();
@@ -134,15 +155,6 @@ async function loadQuiz(quizId) {
     }).on('click', goBackToLanding);
 
     $('body').prepend($backButton);
-
-    let quizData;
-    if (quizId.startsWith('custom_')) {
-      await new Promise(resolve => setTimeout(resolve, 800));
-      quizData = JSON.parse(localStorage.getItem('customQuiz_' + quizId));
-      if (!quizData) throw new Error('Quiz non trouvé');
-    } else {
-      quizData = await $.getJSON(`./quiz/${quizId}.json`);
-    }
 
     window.quizData = quizData;
     window.currentQuizId = quizId;

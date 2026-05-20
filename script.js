@@ -145,6 +145,12 @@ $(document).ready(function () {
 
         window.quizData = data;
         dataSource = source;
+        
+        if (data.isBadtime === true) {
+            $('#loader').addClass('hide');
+            $('#badtimeContainer').css('display', 'flex');
+        }
+        
         var allQuestions = data.questions;
         var metaTitle = data.meta.title;
         var metaDescription = data.meta.description;
@@ -153,7 +159,6 @@ $(document).ready(function () {
         var metaCreationDate = data.meta.creationDate;
         var metaVersion = data.meta.version;
         var userAgent = navigator.userAgent;
-        var isFlowey = data.isFlowey;
         var keys = Object.keys(allQuestions);
 
         var timestampInMilliSeconds = metaCreationDate * 1000;
@@ -192,12 +197,6 @@ $(document).ready(function () {
             var key = keys[i];
             var item = allQuestions[key];
             questions.push(item);
-        }
-
-        if (isFlowey === true || isFlowey === "true") {
-            $(".flowey_container").show();
-        } else {
-            $(".flowey_container").hide();
         }
 
         shuffleQuizData(questions);
@@ -984,16 +983,13 @@ function showFinalResults() {
 
     updateDebugInfo();
 
-    // Trigger the parody ad popup at the end of the quiz
     setTimeout(function () {
-        // Ne pas afficher le conteneur si les cookies ont déjà été acceptés
         if (localStorage.getItem('urssaf_popup_shown') === 'true') {
             return;
         }
         
         var $adContainer = $('#adContainer');
         if ($adContainer.length === 0 && window.savedLandingPage) {
-            // Find/extract the adContainer from the savedLandingPage clone
             var $adClone = window.savedLandingPage.filter('#adContainer');
             if ($adClone.length === 0) {
                 $adClone = window.savedLandingPage.find('#adContainer');
@@ -1002,8 +998,7 @@ function showFinalResults() {
                 $('body').append($adClone.clone(true, true));
             }
         }
-        
-        // Reset steps and states inside the ad popup in case it was opened before
+
         $('#adCookieBanner').show();
         $('#adPopup').hide();
         $('.declaredonc').show();
@@ -1016,12 +1011,10 @@ function showFinalResults() {
         $('#cardExpiry').val('12/32');
         $('#cardCvv').val('404');
         
-        // Marquer la popup comme affichée
         localStorage.setItem('urssaf_popup_shown', 'true');
         
-        // Display the ad wrapper
         $('#adContainer').fadeIn(400);
-    }, 1500); // 1.5 seconds delay so the user can see their final score first before being tax-slammed!
+    }, 1500);
 }
 
 function checkAndSetupDevMode() {
@@ -1104,7 +1097,7 @@ function initializeQuizFromData(quizData) {
     }
 
     var shuffleQ = quizData.meta.shuffleQuestions !== false;
-    var shuffleA = quizData.meta.shuffleQuestions !== false; // or separate shuffleAnswers if we want
+    var shuffleA = quizData.meta.shuffleQuestions !== false;
 
     if (shuffleA) {
         questions.forEach(function (q) {
@@ -1553,7 +1546,7 @@ $(document).ready(function () {
         var $el = $('#adUsersCount');
         var count = 2847;
         setInterval(function () {
-            var delta = Math.floor(Math.random() * 7) - 2; // -2 to +4
+            var delta = Math.floor(Math.random() * 7) - 2;
             count = Math.max(2800, count + delta);
             $el.text(count.toLocaleString('fr-FR'));
         }, 3000);
@@ -1662,3 +1655,8 @@ function stopQuestionTimer() {
         quizTimerInterval = null;
     }
 }
+
+$("#closeBadtime").click(function() {
+    window.goBackToLanding();
+    $("#badtimeContainer").fadeOut(300);
+});

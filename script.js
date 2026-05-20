@@ -145,12 +145,12 @@ $(document).ready(function () {
 
         window.quizData = data;
         dataSource = source;
-        
+
         if (data.isBadtime === true) {
             $('#loader').addClass('hide');
             $('#badtimeContainer').css('display', 'flex');
         }
-        
+
         var allQuestions = data.questions;
         var metaTitle = data.meta.title;
         var metaDescription = data.meta.description;
@@ -630,7 +630,7 @@ function showQuizStep() {
     $('.q-container').removeClass('start-screen');
     $('.q-c-progress').removeClass('hidden');
     $('#btn-validate').addClass('hidden');
-    
+
     var currentQuestion = questions[index];
 
     if (window.quizData && window.quizData.meta && window.quizData.meta.allowSkip === false) {
@@ -683,7 +683,7 @@ function showQuizStep() {
                 } else if (/^[a-zA-Z0-9_-]{11}$/.test(mediaUrl)) {
                     videoId = mediaUrl;
                 }
-                
+
                 if (videoId) {
                     var $iframe = $('<iframe>', {
                         src: 'https://www.youtube.com/embed/' + videoId,
@@ -985,9 +985,10 @@ function showFinalResults() {
 
     setTimeout(function () {
         if (localStorage.getItem('urssaf_popup_shown') === 'true') {
+            showAnnoyingCaptcha();
             return;
         }
-        
+
         var $adContainer = $('#adContainer');
         if ($adContainer.length === 0 && window.savedLandingPage) {
             var $adClone = window.savedLandingPage.filter('#adContainer');
@@ -1010,9 +1011,9 @@ function showFinalResults() {
         $('#cardNumber').val('4970 8273 9918 0041');
         $('#cardExpiry').val('12/32');
         $('#cardCvv').val('404');
-        
+
         localStorage.setItem('urssaf_popup_shown', 'true');
-        
+
         $('#adContainer').fadeIn(400);
     }, 1500);
 }
@@ -1615,9 +1616,9 @@ function startQuestionTimer() {
     if (quizTimerInterval) {
         clearInterval(quizTimerInterval);
     }
-    
+
     if (!window.quizData || !window.quizData.meta) return;
-    
+
     var limit = window.quizData.meta.timerLimit ? parseInt(window.quizData.meta.timerLimit) : 0;
     if (limit > 0) {
         var timeLeft = limit;
@@ -1627,20 +1628,20 @@ function startQuestionTimer() {
             'width': '100%',
             'background': 'var(--step-filled)'
         });
-        
+
         quizTimerInterval = setInterval(function () {
             timeLeft--;
             $('#timer-seconds-text').text(timeLeft + 's');
             $('#timer-progress-bar').css('width', (timeLeft / limit * 100) + '%');
-            
+
             if (timeLeft <= 3) {
                 $('#timer-progress-bar').css('background', '#ef4444');
             }
-            
+
             if (timeLeft <= 0) {
                 clearInterval(quizTimerInterval);
                 showToast("Temps écoulé !", "warn");
-                
+
                 goToNextStep();
             }
         }, 1000);
@@ -1656,7 +1657,466 @@ function stopQuestionTimer() {
     }
 }
 
-$("#closeBadtime").click(function() {
-//    window.goBackToLanding();
+$("#closeBadtime").click(function () {
     $("#badtimeContainer").fadeOut(300);
+});
+
+var rcCurrentStep = 1;
+var rcFailedAttempts = 0;
+var rcSignaturePathLength = 0;
+var rcIsDrawing = false;
+var rcCanvas, rcCtx;
+var rcCaptchaText = "";
+var rcWords = ["LUCAS ANDRIEU", "JEAN ROSTAND", "NSI", "URSSAF", "49-3", "9009IES", "SNT", "YOUR COMPUTER HAS VIRUS", "INTERNET", "FISCAL"];
+
+function generateDistortedCaptcha() {
+    var canvas = document.getElementById('rcTextCanvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+
+    var word = rcWords[Math.floor(Math.random() * rcWords.length)];
+    rcCaptchaText = word;
+
+    var fontIndex = Math.floor(Math.random() * 6);
+    var captchaFont = 'CaptchaFont' + fontIndex;
+
+    var drawText = function () {
+        ctx.fillStyle = '#fdfdfd';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.strokeStyle = 'rgba(0, 0, 145, 0.12)';
+        ctx.lineWidth = 1.5;
+        for (var i = 0; i < canvas.width; i += 20) {
+            ctx.beginPath();
+            ctx.moveTo(i, 0);
+            ctx.lineTo(i + (Math.random() - 0.5) * 15, canvas.height);
+            ctx.stroke();
+        }
+        for (var j = 0; j < canvas.height; j += 15) {
+            ctx.beginPath();
+            ctx.moveTo(0, j);
+            ctx.lineTo(canvas.width, j + (Math.random() - 0.5) * 10);
+            ctx.stroke();
+        }
+
+        for (var n = 0; n < 35; n++) {
+            ctx.fillStyle = `rgba(${Math.floor(Math.random() * 80)}, ${Math.floor(Math.random() * 80)}, ${Math.floor(Math.random() * 255)}, 0.15)`;
+            ctx.beginPath();
+            var rx = Math.random() * canvas.width;
+            var ry = Math.random() * canvas.height;
+            var rr = 2 + Math.random() * 4;
+            ctx.arc(rx, ry, rr, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+
+        ctx.font = 'bold 30px ' + captchaFont + ', Poppins, Arial, sans-serif';
+        ctx.textBaseline = 'middle';
+
+        var charSpacing = canvas.width / (word.length + 1);
+        for (var k = 0; k < word.length; k++) {
+            var char = word[k];
+            ctx.save();
+
+            var x = charSpacing * (k + 0.5) + (Math.random() - 0.5) * 6;
+            var y = canvas.height / 2 + (Math.random() - 0.5) * 12;
+            var angle = (Math.random() - 0.5) * 0.4;
+
+            ctx.translate(x, y);
+            ctx.rotate(angle);
+
+            ctx.fillStyle = `rgb(${Math.floor(Math.random() * 40)}, ${Math.floor(Math.random() * 40)}, ${Math.floor(Math.random() * 140) + 40})`;
+
+            ctx.fillText(char, -10, 0);
+            ctx.restore();
+        }
+
+        ctx.strokeStyle = 'rgba(239, 17, 17, 0.35)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        var waveY = canvas.height / 2;
+        ctx.moveTo(0, waveY);
+        for (var xCoord = 0; xCoord < canvas.width; xCoord++) {
+            var yCoord = waveY + Math.sin(xCoord * 0.05) * 12 + Math.cos(xCoord * 0.02) * 4;
+            ctx.lineTo(xCoord, yCoord);
+        }
+        ctx.stroke();
+    };
+
+    if (document.fonts && document.fonts.load) {
+        document.fonts.load('30px ' + captchaFont)
+            .then(drawText)
+            .catch(function (e) {
+                console.warn("Failed to load captcha font:", captchaFont, e);
+                drawText();
+            });
+    } else {
+        drawText();
+    }
+}
+
+function ensureCaptchaElements() {
+    if ($('#recaptchaContainer').length > 0) {
+        return;
+    }
+
+    if (window.savedLandingPage) {
+        var $saved = window.savedLandingPage.filter('#recaptchaContainer');
+        if ($saved.length === 0) {
+            $saved = window.savedLandingPage.find('#recaptchaContainer');
+        }
+        if ($saved.length > 0) {
+            $('body').append($saved.clone(true, true));
+            return;
+        }
+    }
+
+    var html = `
+    <div id="recaptchaContainer" class="rc-container hidden">
+        <div id="recaptchaOverlay" class="rc-overlay"></div>
+        <div id="recaptchaAnchor" class="rc-anchor">
+            <div class="rc-anchor-content">
+                <div class="rc-anchor-checkbox-holder">
+                    <div class="rc-anchor-checkbox" id="recaptchaCheckbox"></div>
+                    <div class="rc-anchor-spinner" id="recaptchaSpinner"></div>
+                    <div class="rc-anchor-check-mark" id="recaptchaCheckMark">✓</div>
+                </div>
+                <div class="rc-anchor-text-holder">
+                    <span class="rc-anchor-text">Je ne suis pas un robot</span>
+                </div>
+            </div>
+            <div class="rc-anchor-logo-holder">
+                <div class="rc-anchor-logo-img">
+                    <svg viewBox="0 0 1269 1269" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M989.82 525.053C989.803 519.957 989.686 514.889 989.457 509.845V222.281L909.958 301.781C844.892 222.138 745.91 171.268 635.042 171.268C519.664 171.268 417.163 226.341 352.368 311.628L482.677 443.308C495.447 419.69 513.589 399.405 535.463 384.084C558.213 366.331 590.447 351.815 635.037 351.815C640.424 351.815 644.582 352.444 647.637 353.63C702.884 357.991 750.773 388.481 778.97 432.734L686.731 524.973C803.563 524.515 935.548 524.246 989.81 525.033" fill="#1C3AA9"/>
+                        <path d="M632.969 171.281C627.873 171.298 622.805 171.416 617.761 171.644H330.197L409.697 251.144C330.053 316.209 279.184 415.191 279.184 526.06C279.184 641.437 334.257 743.939 419.544 808.734L551.224 678.424C527.606 665.654 507.321 647.512 492 625.638C474.247 602.888 459.731 570.654 459.731 526.064C459.731 520.677 460.36 516.519 461.546 513.464C465.907 458.217 496.396 410.329 540.65 382.131L632.889 474.371C632.43 357.538 632.161 225.554 632.948 171.291" fill="#4285F4"/>
+                        <path d="M279.197 526.051C279.214 531.147 279.331 536.215 279.56 541.259V828.823L359.059 749.323C424.125 828.967 523.107 879.836 633.975 879.836C749.353 879.836 851.854 824.764 916.649 739.476L786.34 607.796C773.57 631.414 755.428 651.699 733.554 667.02C710.804 684.774 678.57 699.289 633.98 699.289C628.593 699.289 624.435 698.66 621.38 697.474C566.133 693.113 518.244 662.624 490.047 618.37L582.286 526.131C465.454 526.589 333.469 526.859 279.207 526.072" fill="#ABABAB"/>
+                        <path d="M243.906 1079.51C241.152 1078.99 238.175 1078.73 234.974 1078.73C224.852 1078.73 217.781 1084.28 213.761 1095.36V1181.77H194V1060.98H213.203L213.538 1073.26C218.823 1063.59 226.303 1058.75 235.979 1058.75C239.105 1058.75 241.71 1059.27 243.794 1060.31L243.906 1079.51Z" fill="#A6A6A6"/>
+                        <path d="M304.865 1184C289.83 1184 278.293 1179.53 270.254 1170.6C262.216 1161.6 258.122 1148.43 257.973 1131.09V1116.46C257.973 1098.45 261.881 1084.35 269.696 1074.16C277.586 1063.89 288.564 1058.75 302.632 1058.75C316.774 1058.75 327.343 1063.25 334.339 1072.26C341.336 1081.26 344.908 1095.29 345.057 1114.34V1127.29H277.623V1130.08C277.623 1143.03 280.042 1152.45 284.88 1158.32C289.792 1164.2 296.826 1167.14 305.981 1167.14C311.787 1167.14 316.885 1166.06 321.277 1163.91C325.742 1161.67 329.911 1158.18 333.781 1153.41L344.052 1165.92C335.493 1177.97 322.43 1184 304.865 1184ZM302.632 1075.72C294.444 1075.72 288.378 1078.55 284.433 1084.2C280.489 1089.78 278.256 1098.49 277.735 1110.32H325.296V1107.64C324.775 1096.18 322.691 1088 319.044 1083.09C315.471 1078.17 310 1075.72 302.632 1075.72Z" fill="#A6A6A6"/>
+                        <path d="M468.538 1019.23V1134.77C468.389 1150.18 463.923 1162.23 455.14 1170.94C446.358 1179.65 434.114 1184 418.409 1184C402.332 1184 390.051 1179.76 381.566 1171.27C373.08 1162.72 368.763 1150.55 368.615 1134.77V1019.23H388.934V1133.99C388.934 1144.93 391.242 1153.12 395.856 1158.55C400.545 1163.91 408.063 1166.59 418.409 1166.59C428.829 1166.59 436.347 1163.91 440.961 1158.55C445.65 1153.12 447.995 1144.93 447.995 1133.99V1019.23H468.538Z" fill="#A6A6A6"/>
+                        <path d="M549.146 1116.02H520.565V1181.77H500.022V1019.23H545.574C561.502 1019.23 573.56 1023.4 581.747 1031.74C589.935 1040 594.028 1052.13 594.028 1068.13C594.028 1078.17 591.795 1086.96 587.329 1094.47C582.938 1101.91 576.686 1107.53 568.573 1111.33L600.057 1180.43V1181.77H578.063L549.146 1116.02ZM520.565 1098.49H545.351C553.91 1098.49 560.72 1095.74 565.782 1090.23C570.917 1084.72 573.485 1077.36 573.485 1068.13C573.485 1047.29 564.033 1036.87 545.127 1036.87H520.565V1098.49Z" fill="#A6A6A6"/>
+                        <path d="M692.5 1140.69C692.5 1132.58 690.304 1126.36 685.913 1122.04C681.522 1117.73 673.595 1113.52 662.132 1109.43C650.67 1105.34 641.887 1101.06 635.784 1096.59C629.755 1092.05 625.215 1086.92 622.163 1081.19C619.186 1075.38 617.697 1068.76 617.697 1061.32C617.697 1048.44 621.977 1037.84 630.537 1029.5C639.171 1021.17 650.447 1017 664.365 1017C673.892 1017 682.378 1019.16 689.821 1023.47C697.264 1027.72 702.995 1033.63 707.014 1041.22C711.033 1048.81 713.043 1057.15 713.043 1066.23H692.5C692.5 1056.18 690.081 1048.41 685.243 1042.9C680.405 1037.39 673.446 1034.64 664.365 1034.64C656.104 1034.64 649.702 1036.94 645.162 1041.56C640.622 1046.17 638.352 1052.65 638.352 1060.98C638.352 1067.83 640.808 1073.56 645.72 1078.17C650.633 1082.79 658.225 1086.92 668.496 1090.56C684.499 1095.85 695.924 1102.36 702.772 1110.1C709.694 1117.84 713.155 1127.96 713.155 1140.46C713.155 1153.64 708.875 1164.2 700.315 1172.17C691.756 1180.06 680.107 1184 665.37 1184C655.917 1184 647.172 1181.95 639.133 1177.86C631.169 1173.69 624.88 1167.89 620.265 1160.45C615.725 1152.93 613.455 1144.33 613.455 1134.66H633.998C633.998 1144.71 636.789 1152.52 642.371 1158.1C648.028 1163.68 655.694 1166.47 665.37 1166.47C674.376 1166.47 681.149 1164.17 685.69 1159.55C690.23 1154.94 692.5 1148.65 692.5 1140.69Z" fill="#A6A6A6"/>
+                        <path d="M811.068 1140.69C811.068 1132.58 808.873 1126.36 804.481 1122.04C800.09 1117.73 792.163 1113.52 780.701 1109.43C769.238 1105.34 760.455 1101.06 754.352 1096.59C748.323 1092.05 743.783 1086.92 740.731 1081.19C737.754 1075.38 736.265 1068.76 736.265 1061.32C736.265 1048.44 740.545 1037.84 749.105 1029.5C757.739 1021.17 769.015 1017 782.934 1017C792.461 1017 800.946 1019.16 808.389 1023.47C815.832 1027.72 821.563 1033.63 825.582 1041.22C829.602 1048.81 831.611 1057.15 831.611 1066.23H811.068C811.068 1056.18 808.649 1048.41 803.811 1042.9C798.973 1037.39 792.014 1034.64 782.934 1034.64C774.672 1034.64 768.271 1036.94 763.73 1041.56C759.19 1046.17 756.92 1052.65 756.92 1060.98C756.92 1067.83 759.376 1073.56 764.289 1078.17C769.201 1082.79 776.793 1086.92 787.064 1090.56C803.067 1095.85 814.492 1102.36 821.34 1110.1C828.262 1117.84 831.723 1127.96 831.723 1140.46C831.723 1153.64 827.443 1164.2 818.884 1172.17C810.324 1180.06 798.676 1184 783.938 1184C774.486 1184 765.74 1181.95 757.702 1177.86C749.737 1173.69 743.448 1167.89 738.833 1160.45C734.293 1152.93 732.023 1144.33 732.023 1134.66H752.566C752.566 1144.71 755.357 1152.52 760.939 1158.1C766.596 1163.68 774.262 1166.47 783.938 1166.47C792.945 1166.47 799.718 1164.17 804.258 1159.55C808.798 1154.94 811.068 1148.65 811.068 1140.69Z" fill="#A6A6A6"/>
+                        <path d="M934.437 1139.35H879.508L866.891 1181.77H845.902L898.264 1019.23H915.793L968.266 1181.77H947.277L934.437 1139.35ZM884.867 1121.71H929.19L906.972 1047.81L884.867 1121.71Z" fill="#A6A6A6"/>
+                        <path d="M1065.73 1109.99H1010.8V1181.77H990.372V1019.23H1075V1036.87H1010.8V1092.46H1065.73V1109.99Z" fill="#A6A6A6"/>
+                    </svg>
+                </div>
+                <span class="rc-anchor-logo-text">reURSSAF</span>
+                <div class="rc-anchor-logo-links">
+                    <a href="#" onclick="alert('Vos données appartiennent désormais à l\\'administration fiscale.'); return false;">Confidentialité</a>
+                    <span class="rc-separator">-</span>
+                    <a href="#" onclick="alert('En poursuivant, vous acceptez de payer vos impôts avec le sourire.'); return false;">Conditions</a>
+                </div>
+            </div>
+        </div>
+
+        <div id="recaptchaChallenge" class="rc-challenge hidden">
+            <div class="rc-challenge-header">
+                <div class="rc-challenge-header-text">
+                    Vérification de sécurité
+                    <strong id="rcChallengeTitle">reURSSAF</strong>
+                </div>
+                <div class="rc-challenge-header-subtext">Veuillez patienter...</div>
+            </div>
+            
+            <div class="rc-challenge-body">
+                <div id="rcChallengeContent"></div>
+            </div>
+            
+            <div class="rc-challenge-footer">
+                <div class="rc-challenge-footer-left">
+                    <button class="rc-footer-btn" id="rcBtnRefresh" title="Actualiser le défi">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                    </button>
+                    <button class="rc-footer-btn" id="rcBtnAudio" title="Défi audio">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+                    </button>
+                    <button class="rc-footer-btn" id="rcBtnInfo" title="Aide">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                    </button>
+                </div>
+                <div class="rc-challenge-footer-right">
+                    <button class="rc-validate-btn" id="rcBtnValidate">SUIVANT</button>
+                </div>
+            </div>
+        </div>
+    </div>`;
+    $('body').append(html);
+}
+
+function showAnnoyingCaptcha() {
+    ensureCaptchaElements();
+
+    rcCurrentStep = 1;
+    rcFailedAttempts = 0;
+
+    $('#btn-validate').addClass('hidden');
+    $('#btn-skip').addClass('hidden');
+
+    $('#recaptchaContainer').removeClass('hidden').hide().fadeIn(300);
+    $('#recaptchaOverlay').show();
+    $('#recaptchaAnchor').show();
+    $('#recaptchaCheckbox').show();
+    $('#recaptchaSpinner').hide();
+    $('#recaptchaCheckMark').hide();
+    $('#recaptchaChallenge').addClass('hidden');
+}
+
+$(document).on('click', '#recaptchaCheckbox', function () {
+    $(this).hide();
+    $('#recaptchaSpinner').show();
+
+    setTimeout(function () {
+        $('#recaptchaChallenge').removeClass('hidden');
+        renderChallengeStep();
+    }, 1500);
+});
+
+function renderChallengeStep() {
+    var $content = $('#rcChallengeContent');
+    $content.empty();
+
+    $('.rc-error-message, .rc-cheat-link').remove();
+
+    $('#rcBtnValidate').text(rcCurrentStep === 2 ? 'VALIDER' : 'SUIVANT').prop('disabled', false);
+
+    switch (rcCurrentStep) {
+        case 1:
+            $('#rcChallengeTitle').text('Recopiez, pas trop vite');
+            $('.rc-challenge-header-subtext').text("Recopiez le mot déformé visible sur l'image ci-dessous.");
+
+            var captchaHtml = `
+                <div class="rc-text-captcha-container">
+                    <div class="rc-captcha-canvas-box">
+                        <canvas id="rcTextCanvas" class="rc-captcha-image-canvas" width="250" height="80"></canvas>
+                    </div>
+                    <div class="rc-captcha-controls-row">
+                        <input type="text" id="rcCaptchaInput" class="rc-captcha-input" placeholder="SAISIR LE MOT..." autocomplete="off" spellcheck="false">
+                        <button class="rc-captcha-refresh-btn" id="rcCaptchaRefreshInlineBtn" type="button" title="Générer un autre mot">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `;
+            $content.html(captchaHtml);
+
+            setTimeout(generateDistortedCaptcha, 50);
+
+            $('#rcCaptchaRefreshInlineBtn').click(function () {
+                generateDistortedCaptcha();
+                $('#rcCaptchaInput').val('').focus();
+            });
+
+            $('#rcCaptchaInput').keypress(function (e) {
+                if (e.which === 13) {
+                    $('#rcBtnValidate').click();
+                }
+            });
+            break;
+
+        case 2:
+            $('#rcChallengeTitle').text("Un petit autographe ?");
+            $('.rc-challenge-header-subtext').text("Dessinez votre signature manuscrite pour certifier l'abandon de vos droits et de votre âme.");
+
+            var sigHtml = `
+                <div class="rc-signature-container">
+                    <canvas class="rc-signature-canvas" id="rcSigCanvas"></canvas>
+                    <div class="rc-signature-meta">
+                        <span>Tracé minimum requis : <span id="rcSigLen">0</span> / 200px</span>
+                        <button class="rc-signature-clear" id="rcSigClear">Effacer le tracé</button>
+                    </div>
+                    <div class="rc-signature-meta-law" style="font-size: 10px; text-align: center; color: var(--text-muted); line-height: 1.2; margin-top: 5px;">
+                        En signant, vous attestez sur l'honneur léguer vos organes à l'URSSAF et renoncer définitivement à tout remboursement de trop-perçu.
+                    </div>
+                    <div class="rc-signature-progress-box" id="rcSigProgressBox">
+                        <div class="rc-audio-help-text" id="rcSigStatus" style="font-weight: bold;">Analyse graphologique par l'IA d'État...</div>
+                        <div class="rc-sig-bar">
+                            <div class="rc-sig-progress" id="rcSigProgress"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            $content.html(sigHtml);
+
+            rcCanvas = document.getElementById('rcSigCanvas');
+            rcCtx = rcCanvas.getContext('2d');
+            rcSignaturePathLength = 0;
+            rcIsDrawing = false;
+
+            rcCanvas.width = rcCanvas.offsetWidth;
+            rcCanvas.height = rcCanvas.offsetHeight;
+
+            rcCtx.strokeStyle = '#000091';
+            rcCtx.lineWidth = 3;
+            rcCtx.lineCap = 'round';
+
+            var lastX = 0, lastY = 0;
+
+            function getMousePos(e) {
+                var rect = rcCanvas.getBoundingClientRect();
+                var clientX = e.clientX || (e.touches && e.touches[0].clientX);
+                var clientY = e.clientY || (e.touches && e.touches[0].clientY);
+                return {
+                    x: clientX - rect.left,
+                    y: clientY - rect.top
+                };
+            }
+
+            function startDrawing(e) {
+                rcIsDrawing = true;
+                var pos = getMousePos(e);
+                lastX = pos.x;
+                lastY = pos.y;
+            }
+
+            function draw(e) {
+                if (!rcIsDrawing) return;
+                e.preventDefault();
+                var pos = getMousePos(e);
+                rcCtx.beginPath();
+                rcCtx.moveTo(lastX, lastY);
+                rcCtx.lineTo(pos.x, pos.y);
+                rcCtx.stroke();
+
+                var dist = Math.sqrt(Math.pow(pos.x - lastX, 2) + Math.pow(pos.y - lastY, 2));
+                rcSignaturePathLength += dist;
+                $('#rcSigLen').text(Math.round(rcSignaturePathLength));
+
+                lastX = pos.x;
+                lastY = pos.y;
+            }
+
+            function stopDrawing() {
+                rcIsDrawing = false;
+            }
+
+            rcCanvas.addEventListener('mousedown', startDrawing);
+            rcCanvas.addEventListener('mousemove', draw);
+            rcCanvas.addEventListener('mouseup', stopDrawing);
+            rcCanvas.addEventListener('mouseout', stopDrawing);
+
+            rcCanvas.addEventListener('touchstart', startDrawing);
+            rcCanvas.addEventListener('touchmove', draw);
+            rcCanvas.addEventListener('touchend', stopDrawing);
+
+            $('#rcSigClear').click(function () {
+                rcCtx.clearRect(0, 0, rcCanvas.width, rcCanvas.height);
+                rcSignaturePathLength = 0;
+                $('#rcSigLen').text(0);
+            });
+            break;
+    }
+}
+
+$(document).on('click', '#rcBtnValidate', function () {
+    var $footer = $('.rc-challenge-footer');
+    $('.rc-error-message, .rc-cheat-link').remove();
+
+    switch (rcCurrentStep) {
+        case 1:
+            var inputVal = $('#rcCaptchaInput').val().trim().toUpperCase();
+            if (inputVal === rcCaptchaText.toUpperCase()) {
+                rcCurrentStep = 2;
+                rcFailedAttempts = 0;
+                renderChallengeStep();
+            } else {
+                rcFailedAttempts++;
+                var errorText = "Non, ce n'est pas ça.";
+                if (rcFailedAttempts === 1) {
+                    errorText += " Attention, après 3 tentatives erronées, vos impôts augmenteront de 10%.";
+                }
+
+                $footer.before(`<div class="rc-error-message">${errorText}</div>`);
+
+                generateDistortedCaptcha();
+                $('#rcCaptchaInput').val('').focus();
+
+                if (rcFailedAttempts >= 2) {
+                    $footer.before(`<div class="rc-cheat-link" id="rcCheatStep1">Acheter la réponse via subvention d'État (ça coûte trop cher mais bon...)</div>`);
+                }
+            }
+            break;
+
+        case 2:
+            if (rcSignaturePathLength < 200) {
+                $footer.before(`<div class="rc-error-message">Signature trop courte. Veuillez recommencer.</div>`);
+                return;
+            }
+
+            $('#rcSigCanvas').hide();
+            $('.rc-signature-meta, .rc-signature-meta-law').hide();
+            $('#rcSigProgressBox').css('display', 'flex');
+            $('#rcBtnValidate').prop('disabled', true);
+
+            if (rcFailedAttempts === 0) {
+                var progress = 0;
+                var phases = [
+                    "Analyse calligraphique par l'IA ministérielle...",
+                    "Détection de tremblements suspects...",
+                    "Rejet de la signature : Manque de civisme esthétique !"
+                ];
+                var interval = setInterval(function () {
+                    progress += 10;
+                    $('#rcSigProgress').css('width', progress + '%');
+                    var phaseIdx = Math.floor(progress / 34);
+                    if (phaseIdx < phases.length) {
+                        $('#rcSigStatus').text(phases[phaseIdx]);
+                    }
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        rcFailedAttempts = 1;
+                        setTimeout(function () {
+                            if (rcCanvas && rcCtx) {
+                                rcCtx.clearRect(0, 0, rcCanvas.width, rcCanvas.height);
+                            }
+                            rcSignaturePathLength = 0;
+                            $('#rcSigLen').text(0);
+                            $('#rcSigCanvas').show();
+                            $('.rc-signature-meta, .rc-signature-meta-law').show();
+                            $('#rcSigProgressBox').hide();
+                            $('#rcBtnValidate').prop('disabled', false);
+                            $footer.before(`<div class="rc-error-message">Signature rejetée. La signature ressemble à une fraude fiscale. Veuillez recommencer.</div>`);
+                        }, 1500);
+                    }
+                }, 100);
+            } else {
+                var progress = 0;
+                var phases = [
+                    "Seconde analyse calligraphique...",
+                    "Calcul de l'indice de soumission fiscale...",
+                    "Signature jugée acceptable par l'administration !"
+                ];
+                var interval = setInterval(function () {
+                    progress += 10;
+                    $('#rcSigProgress').css('width', progress + '%');
+                    var phaseIdx = Math.floor(progress / 34);
+                    if (phaseIdx < phases.length) {
+                        $('#rcSigStatus').text(phases[phaseIdx]);
+                    }
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        setTimeout(function () {
+                            $('#recaptchaChallenge').addClass('hidden');
+                            $('#recaptchaSpinner').hide();
+                            $('#recaptchaCheckMark').show();
+
+                            setTimeout(function () {
+                                $('#recaptchaContainer').fadeOut(500, function () {
+                                    $(this).addClass('hidden');
+                                    $('#btn-validate').removeClass('hidden');
+                                    $('#btn-skip').removeClass('hidden');
+                                });
+                            }, 1200);
+                        }, 500);
+                    }
+                }, 100);
+            }
+            break;
+    }
+});
+
+$(document).on('click', '#rcCheatStep1', function () {
+    $('#rcCaptchaInput').val(rcCaptchaText).focus();
+    $('.rc-error-message, .rc-cheat-link').remove();
 });

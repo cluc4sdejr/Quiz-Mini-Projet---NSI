@@ -1483,9 +1483,15 @@ body.dark .difficulty-badge.moyen {
     color: #c00000;
 }
 
+
+.difficulty-badge.difficile {
+    background: #e2feff;
+    color: hsl(184, 100%, 38%);
+}
+
 body.dark .difficulty-badge.difficile {
-    background: #c00000;
-    color: #FFE2E2;
+    background-color: hsl(184, 100%, 38%);
+    color: #e2feff;
 }
 
 .card-content {

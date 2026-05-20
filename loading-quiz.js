@@ -123,7 +123,7 @@ async function loadQuiz(quizId) {
     if (!window.savedLandingPage) {
       window.savedLandingPage = $('body').children().not('script').clone(true, true);
     }
-    $('body').empty().append(templateHtml);
+    $('body').append(templateHtml);
     if (typeof window.bindQuizEvents === 'function') {
       window.bindQuizEvents();
     }
@@ -164,7 +164,7 @@ function goBackToLanding() {
     window.stopQuestionTimer();
   }
   if (window.savedLandingPage) {
-    $('body').append(window.savedLandingPage.clone(true, true));
+    $('body').empty().append(window.savedLandingPage.clone(true, true));
     if (typeof loadAllQuizzes === 'function') {
       loadAllQuizzes();
     }

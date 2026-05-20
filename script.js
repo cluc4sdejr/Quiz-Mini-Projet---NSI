@@ -206,6 +206,10 @@ $(document).ready(function () {
 
         var savedData = localStorage.getItem('quiz');
 
+        if (isFlowey != "true") {
+            $(".flowey_container").show();
+        }
+
         if (savedData != null) {
             var parsedData = JSON.parse(savedData);
 
@@ -628,14 +632,12 @@ function showQuizStep() {
     
     var currentQuestion = questions[index];
 
-    // Handle skip option visibility
     if (window.quizData && window.quizData.meta && window.quizData.meta.allowSkip === false) {
         $('#btn-skip').addClass('hidden');
     } else {
         $('#btn-skip').removeClass('hidden');
     }
 
-    // Handle countdown timer
     startQuestionTimer();
 
     var hadMedia = $('.q-media').length > 0 && $('.q-media').css('opacity') !== '0';

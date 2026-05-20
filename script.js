@@ -1657,6 +1657,6 @@ function stopQuestionTimer() {
 }
 
 $("#closeBadtime").click(function() {
-    window.goBackToLanding();
+//    window.goBackToLanding();
     $("#badtimeContainer").fadeOut(300);
 });

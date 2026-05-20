@@ -111,7 +111,7 @@ function getDifficultyLabel(difficulty) {
     1: { label: 'Facile', class: 'facile' },
     2: { label: 'Moyen', class: 'moyen' },
     3: { label: 'Difficile', class: 'difficile' },
-    4: { label: 'Très très tuff', class: 'difficile' }
+    4: { label: 'Très très tuff', class: 'tuff' }
   };
   return difficultyMap[difficulty] || { label: 'Moyen', class: 'moyen' };
 }

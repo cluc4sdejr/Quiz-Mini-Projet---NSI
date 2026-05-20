@@ -1483,13 +1483,17 @@ body.dark .difficulty-badge.moyen {
     color: #c00000;
 }
 
+body.dark .difficulty-badge.difficile {
+    background: #c00000;
+    color: #FFE2E2;
+}
 
-.difficulty-badge.difficile {
+.difficulty-badge.tuff {
     background: #e2feff;
     color: hsl(184, 100%, 38%);
 }
 
-body.dark .difficulty-badge.difficile {
+body.dark .difficulty-badge.tuff {
     background-color: hsl(184, 100%, 38%);
     color: #e2feff;
 }

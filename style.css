@@ -2919,7 +2919,7 @@ input:checked+.slider:before {
     display: flex;
     justify-content: center;
     align-items: center;
-    animation: sansContainerIn 1s ease-out;
+    animation: sansContainerIn 0.5s ease-out;
 }
 
 @keyframes sansContainerIn {

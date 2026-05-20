@@ -195,9 +195,9 @@ $(document).ready(function () {
         }
 
         if (isFlowey === true || isFlowey === "true") {
-            $(".flowey_container").hide();
-        } else {
             $(".flowey_container").show();
+        } else {
+            $(".flowey_container").hide();
         }
 
         shuffleQuizData(questions);

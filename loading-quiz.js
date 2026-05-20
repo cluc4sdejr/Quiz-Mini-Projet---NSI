@@ -164,7 +164,7 @@ function goBackToLanding() {
     window.stopQuestionTimer();
   }
   if (window.savedLandingPage) {
-    $('body').empty().append(window.savedLandingPage.clone(true, true));
+    $('body').append(window.savedLandingPage.clone(true, true));
     if (typeof loadAllQuizzes === 'function') {
       loadAllQuizzes();
     }

@@ -116,10 +116,6 @@ $(document).ready(function () {
     var dataSource = 'original';
     var dataToLoad = null;
 
-    if (isFlowey != "true") {
-        $(".flowey_container").show();
-    }
-
     if (importedData) {
         try {
             dataToLoad = JSON.parse(importedData);
@@ -196,6 +192,12 @@ $(document).ready(function () {
             var key = keys[i];
             var item = allQuestions[key];
             questions.push(item);
+        }
+
+        if (isFlowey === true || isFlowey === "true") {
+            $(".flowey_container").hide();
+        } else {
+            $(".flowey_container").show();
         }
 
         shuffleQuizData(questions);

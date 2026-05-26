@@ -1948,7 +1948,7 @@ function renderChallengeStep() {
             rcCanvas.height = rcCanvas.offsetHeight;
 
             rcCtx.strokeStyle = '#000091';
-            rcCtx.lineWidth = 3;
+            rcCtx.lineWidth = 15; // 3
             rcCtx.lineCap = 'round';
 
             var lastX = 0, lastY = 0;

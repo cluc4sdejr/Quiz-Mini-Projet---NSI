@@ -1667,7 +1667,7 @@ var rcSignaturePathLength = 0;
 var rcIsDrawing = false;
 var rcCanvas, rcCtx;
 var rcCaptchaText = "";
-var rcWords = ["KAHIL HAMOUTENE", "JEAN ROSTAND", "NSI", "URSSAF", "49-3", "9009IES", "SNT", "YOUR COMPUTER HAS VIRUS", "INTERNET", "FISCAL"];
+var rcWords = ["KAHIL HAMMOUTENE", "JEAN ROSTAND", "NSI", "URSSAF", "49-3", "9009IES", "SNT", "YOUR COMPUTER HAS VIRUS", "INTERNET", "FISCAL"];
 
 function generateDistortedCaptcha() {
     var canvas = document.getElementById('rcTextCanvas');
